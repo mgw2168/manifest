@@ -23,16 +23,15 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/klog/v2"
+	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"time"
 
+	"github.com/kubesphere/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	"github.com/kubesphere/api/v1alpha1"
 )
 
 var decUnstructured = yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
@@ -85,7 +84,7 @@ func (r *ManifestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		if utils.ContainsString(customResource.ObjectMeta.Finalizers, finalizer) {
 			err := r.deleteCluster(ctx, customResource)
 			if err != nil {
-				klog.Error(err.Error())
+				klog.Error(err, "delete database cluster error")
 			}
 			customResource.ObjectMeta.Finalizers = utils.RemoveString(customResource.ObjectMeta.Finalizers, func(item string) bool {
 				if item == finalizer {
@@ -106,7 +105,7 @@ func (r *ManifestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			return ctrl.Result{}, err
 		}
 	}
-	klog.Info("resource name: ", customResource.Name, ", state: ", customResource.Status.Status)
+	klog.V(2).Info("resource name: ", customResource.Name, ", state: ", customResource.Status.Status)
 	return ctrl.Result{}, nil
 }
 
@@ -114,7 +113,7 @@ func (r *ManifestReconciler) patchCluster(ctx context.Context, resource *v1alpha
 	obj := &unstructured.Unstructured{}
 	_, _, err := decUnstructured.Decode([]byte(resource.Spec.CustomResource), nil, obj)
 	if err != nil {
-		klog.Errorf("get gvk error: %s", err.Error())
+		klog.Error(err, "get gvk error")
 		return err
 	}
 
@@ -133,7 +132,7 @@ func (r *ManifestReconciler) deleteCluster(ctx context.Context, resource *v1alph
 	obj := &unstructured.Unstructured{}
 	_, _, err := decUnstructured.Decode([]byte(resource.Spec.CustomResource), nil, obj)
 	if err != nil {
-		klog.Errorf("get gvk error: %s", err.Error())
+		klog.Error(err, "delete cluster error.")
 		return err
 	}
 	err = r.Delete(ctx, obj)
@@ -144,7 +143,7 @@ func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alp
 	obj := &unstructured.Unstructured{}
 	_, _, err := decUnstructured.Decode([]byte(resource.Spec.CustomResource), nil, obj)
 	if err != nil {
-		klog.Errorf("get gvk error: %s", err.Error())
+		klog.Error(err, "install cluster error.")
 		return err
 	}
 	obj.SetName(resource.Name)
@@ -162,7 +161,7 @@ func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alp
 	}, obj)
 
 	if err != nil {
-		klog.Error(err.Error())
+		klog.Error(err, "get unstructured object error.")
 		return err
 	}
 	statusMap, ok := obj.Object["status"].(map[string]interface{})
