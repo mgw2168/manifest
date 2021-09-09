@@ -1,0 +1,20 @@
+# permissions for end users to view operatorapplicationversions.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: operatorapplicationversion-viewer-role
+rules:
+- apiGroups:
+  - application.kubesphere.io
+  resources:
+  - operatorapplicationversions
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - application.kubesphere.io
+  resources:
+  - operatorapplicationversions/status
+  verbs:
+  - get

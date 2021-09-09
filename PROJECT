@@ -1,0 +1,34 @@
+domain: kubesphere.io
+layout:
+- go.kubebuilder.io/v3
+projectName: manifest
+repo: github.com/kubesphere
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: kubesphere.io
+  group: application
+  kind: OperatorApplicationVersion
+  path: github.com/kubesphere/api/v1alpha1
+  version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: kubesphere.io
+  group: application
+  kind: OperatorApplication
+  path: github.com/kubesphere/api/v1alpha1
+  version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: kubesphere.io
+  group: application
+  kind: Manifest
+  path: github.com/kubesphere/api/v1alpha1
+  version: v1alpha1
+version: "3"

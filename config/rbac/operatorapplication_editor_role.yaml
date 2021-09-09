@@ -1,0 +1,24 @@
+# permissions for end users to edit operatorapplications.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: operatorapplication-editor-role
+rules:
+- apiGroups:
+  - application.kubesphere.io
+  resources:
+  - operatorapplications
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - application.kubesphere.io
+  resources:
+  - operatorapplications/status
+  verbs:
+  - get
