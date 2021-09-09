@@ -1,7 +1,12 @@
 apiVersion: application.kubesphere.io/v1alpha1
 kind: OperatorApplication
 metadata:
-  name: operatorapplication-sample
+  name: app-xxx123xy
 spec:
   # Add fields here
-  foo: bar
+  name: "ClickHouseInstallation"
+  description: "ClickHouse Database, the high performance columnar database."
+  owner: "admin"
+  icon: "https://github.com/etcd-io/etcd/raw/master/logos/etcd-glyph-color.svg"
+status:
+  state: active

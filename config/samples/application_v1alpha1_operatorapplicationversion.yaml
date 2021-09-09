@@ -1,7 +1,20 @@
 apiVersion: application.kubesphere.io/v1alpha1
 kind: OperatorApplicationVersion
 metadata:
-  name: operatorapplicationversion-sample
+  name: appv-xr4m0jlxlp3j47
+  ownerReferences:
+    - apiVersion: application.kubesphere.io/v1alpha1
+      kind: OperatorApplication
+      name: app-xxx123xy
 spec:
-  # Add fields here
-  foo: bar
+  name: clickhouse
+  OperatorVersion: 2.0
+  versionLog:
+    - version: 2.0
+      updateLog: "Operator支持Zookeeper部署"
+    - version: 1.0
+      updateLog: "helm 版本xxx"
+  appVersion: 20.9
+  createTime: "2021-09-06T10:50:28.000+08:00"
+status:
+  state: active
