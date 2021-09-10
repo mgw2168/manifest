@@ -29,7 +29,7 @@ type ManifestSpec struct {
 	Kind string `json:"kind"`
 	// info from frontend
 	Description    string `json:"description,omitempty"`
-	Application    string `json:"application,omitempty"`
+	App            string `json:"application,omitempty"`
 	AppVersion     string `json:"appVersion"`
 	CustomResource string `json:"customResource" yaml:"customResource"`
 }

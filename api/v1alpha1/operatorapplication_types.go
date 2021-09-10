@@ -26,7 +26,7 @@ import (
 // OperatorApplicationSpec defines the desired state of OperatorApplication
 type OperatorApplicationSpec struct {
 	// the name of the operator application
-	Name string `json:"name"`
+	AppName string `json:"appName"`
 	// description from operator's description or frontend
 	Description string `json:"description,omitempty"`
 	Owner       string `json:"owner"`
@@ -35,7 +35,7 @@ type OperatorApplicationSpec struct {
 
 // OperatorApplicationStatus defines the observed state of OperatorApplication
 type OperatorApplicationStatus struct {
-	State string `json:"state,omitempty"`
+	Status string `json:"state,omitempty"`
 }
 
 //+genclient

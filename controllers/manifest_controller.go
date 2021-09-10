@@ -173,13 +173,13 @@ func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alp
 	resource.Status.Status = clusterStatus
 	switch resource.Kind {
 	case v1alpha1.DBTypeClickHouse:
-		resource.Spec.Application = v1alpha1.ClusterAppTypeClickHouse
+		resource.Spec.App = v1alpha1.ClusterAppTypeClickHouse
 	case v1alpha1.DBTypePostgreSQL:
-		resource.Spec.Application = v1alpha1.ClusterAPPTypePostgreSQL
+		resource.Spec.App = v1alpha1.ClusterAPPTypePostgreSQL
 	case v1alpha1.DBTypeMysql:
-		resource.Spec.Application = v1alpha1.ClusterAPPTypeMySQL
+		resource.Spec.App = v1alpha1.ClusterAPPTypeMySQL
 	default:
-		resource.Spec.Application = ""
+		resource.Spec.App = ""
 	}
 	err = r.Client.Status().Update(ctx, resource)
 	if err != nil {

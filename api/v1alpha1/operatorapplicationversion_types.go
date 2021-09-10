@@ -25,11 +25,12 @@ import (
 
 // OperatorApplicationVersionSpec defines the desired state of OperatorApplicationVersion
 type OperatorApplicationVersionSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// Foo is an example field of OperatorApplicationVersion. Edit operatorapplicationversion_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// the name of the operator
+	AppName         string       `json:"appName"`
+	OperatorVersion string       `json:"operatorVersion"`
+	AppVersion      string       `json:"appVersion"`
+	ChangeLog       string       `json:"changeLog"`
+	CreateTime      *metav1.Time `json:"createTime"`
 }
 
 // OperatorApplicationVersionStatus defines the observed state of OperatorApplicationVersion
@@ -38,6 +39,7 @@ type OperatorApplicationVersionStatus struct {
 	// Important: Run "make" to regenerate code after modifying this file
 }
 
+//+genclient
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
