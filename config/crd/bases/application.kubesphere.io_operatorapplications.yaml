@@ -37,18 +37,18 @@ spec:
           spec:
             description: OperatorApplicationSpec defines the desired state of OperatorApplication
             properties:
+              appName:
+                description: the name of the operator application
+                type: string
               description:
                 description: description from operator's description or frontend
                 type: string
               icon:
                 type: string
-              name:
-                description: the name of the operator application
-                type: string
               owner:
                 type: string
             required:
-            - name
+            - appName
             - owner
             type: object
           status:

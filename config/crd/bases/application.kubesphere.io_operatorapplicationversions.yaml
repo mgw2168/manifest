@@ -38,10 +38,24 @@ spec:
             description: OperatorApplicationVersionSpec defines the desired state
               of OperatorApplicationVersion
             properties:
-              foo:
-                description: Foo is an example field of OperatorApplicationVersion.
-                  Edit operatorapplicationversion_types.go to remove/update
+              appName:
+                description: the name of the operator
                 type: string
+              appVersion:
+                type: string
+              changeLog:
+                type: string
+              createTime:
+                format: date-time
+                type: string
+              operatorVersion:
+                type: string
+            required:
+            - appName
+            - appVersion
+            - changeLog
+            - createTime
+            - operatorVersion
             type: object
           status:
             description: OperatorApplicationVersionStatus defines the observed state

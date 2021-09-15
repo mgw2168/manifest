@@ -50,6 +50,10 @@ func (r *OperatorApplicationReconciler) Reconcile(ctx context.Context, req ctrl.
 	_ = log.FromContext(ctx)
 
 	// your logic here
+	/**
+	app中创建APP，同时创建APPversion
+	APPversion创建关联manifest
+	*/
 
 	return ctrl.Result{}, nil
 }

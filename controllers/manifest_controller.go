@@ -34,12 +34,17 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-var decUnstructured = yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
+const CheckTime = 2 * time.Minute
+
+var (
+	decUnstructured = yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
+	finalizer       = "finalizers.radondb.com/customresource"
+)
 
 // ManifestReconciler reconciles a Manifest object
 type ManifestReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme   *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=application.kubesphere.io,resources=manifests,verbs=get;list;watch;create;update;patch;delete
@@ -70,8 +75,6 @@ func (r *ManifestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return reconcile.Result{}, err
 	}
 
-	finalizer := "finalizers.radondb.com/customresource"
-
 	if customResource.ObjectMeta.DeletionTimestamp.IsZero() {
 		// The object is not being deleted
 		if !utils.ContainsString(customResource.ObjectMeta.Finalizers, finalizer) {
@@ -100,10 +103,14 @@ func (r *ManifestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		if err := r.installCluster(ctx, customResource); err != nil {
 			return ctrl.Result{}, err
 		}
-	} else {
+		// todo upgrade
+	} else if customResource.Status.Version != customResource.Spec.Version {
 		if err := r.patchCluster(ctx, customResource); err != nil {
 			return ctrl.Result{}, err
 		}
+	} else {
+		// update custom resource status
+		return r.checkResourceStatus(ctx, customResource)
 	}
 	klog.V(2).Info("resource name: ", customResource.Name, ", state: ", customResource.Status.Status)
 	return ctrl.Result{}, nil
@@ -116,15 +123,22 @@ func (r *ManifestReconciler) patchCluster(ctx context.Context, resource *v1alpha
 		klog.Error(err, "get gvk error")
 		return err
 	}
-
+	klog.V(2).Infof("patch cluster: %s, %s", resource.Namespace, resource.Name)
 	obj.SetName(resource.Name)
 	obj.SetNamespace(resource.Namespace)
-
 	err = r.Client.Patch(ctx, obj, client.Merge)
 	if err != nil {
 		klog.Info(err.Error())
 		return err
 	}
+
+	resource.Status.Version = resource.Spec.Version
+	err = r.Client.Status().Update(ctx, resource)
+	if err != nil {
+		resource.Status.Status = v1alpha1.Failed
+		err = r.Status().Update(ctx, resource)
+	}
+
 	return nil
 }
 
@@ -135,6 +149,9 @@ func (r *ManifestReconciler) deleteCluster(ctx context.Context, resource *v1alph
 		klog.Error(err, "delete cluster error.")
 		return err
 	}
+	klog.V(2).Infof("delete cluster: %s, %s", resource.Namespace, resource.Name)
+	obj.SetName(resource.Name)
+	obj.SetNamespace(resource.GetNamespace())
 	err = r.Delete(ctx, obj)
 	return err
 }
@@ -146,6 +163,8 @@ func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alp
 		klog.Error(err, "install cluster error.")
 		return err
 	}
+	klog.V(2).Infof("install cluster: %s, %s", resource.Namespace, resource.Name)
+
 	obj.SetName(resource.Name)
 	obj.SetNamespace(resource.Namespace)
 	err = r.Create(ctx, obj)
@@ -171,6 +190,7 @@ func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alp
 		clusterStatus = v1alpha1.ClusterStatusUnknown
 	}
 	resource.Status.Status = clusterStatus
+	resource.Status.Version = resource.Spec.Version
 	switch resource.Kind {
 	case v1alpha1.DBTypeClickHouse:
 		resource.Spec.App = v1alpha1.ClusterAppTypeClickHouse
@@ -189,8 +209,44 @@ func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alp
 	return nil
 }
 
+func (r *ManifestReconciler) checkResourceStatus(ctx context.Context, resource *v1alpha1.Manifest) (ctrl.Result, error) {
+	obj := &unstructured.Unstructured{}
+	_, _, err := decUnstructured.Decode([]byte(resource.Spec.CustomResource), nil, obj)
+	if err != nil {
+		klog.Error(err, "get gvk error")
+		return ctrl.Result{}, err
+	}
+	klog.V(2).Infof("do check status: %s, %s", resource.Namespace, resource.Name)
+	obj.SetName(resource.Name)
+	obj.SetNamespace(resource.Namespace)
+
+	err = r.Get(ctx, types.NamespacedName{
+		Namespace: resource.Namespace,
+		Name:      resource.Name}, obj)
+	if err != nil {
+		klog.Info(err.Error())
+	}
+
+	var clusterStatus string
+	statusMap, ok := obj.Object["status"].(map[string]interface{})
+	if ok {
+		clusterStatus = statusMap["status"].(string)
+	} else {
+		clusterStatus = v1alpha1.ClusterStatusUnknown
+	}
+
+	resource.Status.Status = clusterStatus
+	err = r.Client.Status().Update(ctx, resource)
+	if err != nil {
+		resource.Status.Status = v1alpha1.Failed
+		err = r.Status().Update(ctx, resource)
+	}
+	return ctrl.Result{RequeueAfter: CheckTime}, err
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *ManifestReconciler) SetupWithManager(mgr ctrl.Manager) error {
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.Manifest{}).
 		Complete(r)
