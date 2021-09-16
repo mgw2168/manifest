@@ -18,13 +18,16 @@ package controllers
 
 import (
 	"context"
-
+	applicationv1alpha1 "github.com/kubesphere/api/v1alpha1"
+	sliceutil "github.com/kubesphere/controllers/utils"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+)
 
-	applicationv1alpha1 "github.com/kubesphere/api/v1alpha1"
+const (
+	operatorAppFinalizer = "operatorapplication.application.kubesphere.io"
 )
 
 // OperatorApplicationReconciler reconciles a OperatorApplication object
@@ -54,6 +57,33 @@ func (r *OperatorApplicationReconciler) Reconcile(ctx context.Context, req ctrl.
 	app中创建APP，同时创建APPversion
 	APPversion创建关联manifest
 	*/
+	operatorApp := &applicationv1alpha1.OperatorApplication{}
+	err := r.Client.Get(ctx, req.NamespacedName, operatorApp)
+	if err != nil {
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	if operatorApp.ObjectMeta.DeletionTimestamp.IsZero() {
+		// The object is not being deleted
+		if !sliceutil.ContainsString(operatorApp.Finalizers, operatorAppFinalizer) {
+			operatorApp.Finalizers = append(operatorApp.Finalizers, operatorAppFinalizer)
+			err := r.Update(ctx, operatorApp)
+			return ctrl.Result{}, err
+		}
+	} else {
+		// The object is being deleted
+		if sliceutil.ContainsString(operatorApp.Finalizers, operatorAppFinalizer) {
+			operatorApp.Finalizers = sliceutil.RemoveString(operatorApp.Finalizers, func(item string) bool {
+				if item == operatorAppFinalizer {
+					return true
+				} else {
+					return false
+				}
+			})
+			err = r.Update(ctx, operatorApp)
+			return ctrl.Result{}, err
+		}
+	}
 
 	return ctrl.Result{}, nil
 }

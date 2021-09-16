@@ -34,7 +34,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-const CheckTime = 2 * time.Minute
+const CheckTime = 1 * time.Minute
 
 var (
 	decUnstructured = yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
@@ -77,19 +77,19 @@ func (r *ManifestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	if customResource.ObjectMeta.DeletionTimestamp.IsZero() {
 		// The object is not being deleted
-		if !utils.ContainsString(customResource.ObjectMeta.Finalizers, finalizer) {
+		if !sliceutil.ContainsString(customResource.ObjectMeta.Finalizers, finalizer) {
 			customResource.ObjectMeta.Finalizers = append(customResource.ObjectMeta.Finalizers, finalizer)
 			err := r.Update(ctx, customResource)
 			return reconcile.Result{}, err
 		}
 	} else {
 		// The object is being deleted
-		if utils.ContainsString(customResource.ObjectMeta.Finalizers, finalizer) {
+		if sliceutil.ContainsString(customResource.ObjectMeta.Finalizers, finalizer) {
 			err := r.deleteCluster(ctx, customResource)
 			if err != nil {
-				klog.Error(err, "delete database cluster error")
+				klog.Errorf("delete database cluster error: %s", client.IgnoreNotFound(err).Error())
 			}
-			customResource.ObjectMeta.Finalizers = utils.RemoveString(customResource.ObjectMeta.Finalizers, func(item string) bool {
+			customResource.ObjectMeta.Finalizers = sliceutil.RemoveString(customResource.ObjectMeta.Finalizers, func(item string) bool {
 				if item == finalizer {
 					return true
 				}
@@ -111,7 +111,7 @@ func (r *ManifestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		// check custom resources status
 		return r.checkResourceStatus(ctx, customResource)
 	}
-	klog.Info("resource name: ", customResource.Name, ", state: ", customResource.Status.Status)
+	klog.V(1).Info("resource name: ", customResource.Name, ", state: ", customResource.Status.Status)
 	return ctrl.Result{}, nil
 }
 
@@ -122,7 +122,7 @@ func (r *ManifestReconciler) patchCluster(ctx context.Context, resource *v1alpha
 	}
 	err = r.Client.Patch(ctx, obj, client.Merge)
 	if err != nil {
-		klog.Info(err.Error())
+		klog.V(1).Info(err.Error())
 		return err
 	}
 
@@ -137,7 +137,8 @@ func (r *ManifestReconciler) patchCluster(ctx context.Context, resource *v1alpha
 }
 
 func (r *ManifestReconciler) deleteCluster(ctx context.Context, resource *v1alpha1.Manifest) error {
-	klog.Info("do delete cluster...")
+	klog.V(1).Infof("do delete cluster: %s, %s, %s", resource.Namespace, resource.Name, resource.Spec.Kind)
+
 	obj, err := getUnstructuredObj(resource)
 	if err != nil {
 		return err
@@ -147,7 +148,7 @@ func (r *ManifestReconciler) deleteCluster(ctx context.Context, resource *v1alph
 }
 
 func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alpha1.Manifest) error {
-	klog.Infof("install cluster: %s, %s", resource.Namespace, resource.Name)
+	klog.V(1).Infof("install cluster: %s, %s, %s", resource.Namespace, resource.Name, resource.Spec.Kind)
 	obj, err := getUnstructuredObj(resource)
 	if err != nil {
 		return err
@@ -191,7 +192,7 @@ func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alp
 }
 
 func (r *ManifestReconciler) checkResourceStatus(ctx context.Context, resource *v1alpha1.Manifest) (ctrl.Result, error) {
-	klog.Infof("do check status: %s, %s", resource.Namespace, resource.Name)
+	klog.V(1).Infof("do check status: %s, %s, %s", resource.Namespace, resource.Name, resource.Spec.Kind)
 	obj, err := getUnstructuredObj(resource)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -201,7 +202,7 @@ func (r *ManifestReconciler) checkResourceStatus(ctx context.Context, resource *
 		Namespace: resource.Namespace,
 		Name:      resource.Name}, obj)
 	if err != nil {
-		klog.Info(err.Error())
+		klog.V(1).Info(err.Error())
 	}
 
 	clusterStatus := getUnstructuredObjStatus(obj)

@@ -1,0 +1,85 @@
+apiVersion: application.kubesphere.io/v1alpha1
+kind: Manifest
+metadata:
+  name: manifest-pg003
+  namespace: pg-project
+spec:
+  kind: "ClickHouseInstallation"
+  appVersion: "20.9"
+  version: 2
+  customResource: |
+      apiVersion: radondb.com/v1
+      kind: Pgcluster
+      metadata:
+        annotations:
+          #用于跟踪集群当前主节点的注释(同集群名称)
+          current-primary: hippo
+        labels:
+          radondb-pgha-scope: hippo
+          deployment-name: hippo
+          name: hippo
+          pg-cluster: hippo
+          pgo-version: 4.7.1
+          pgouser: admin
+        name: hippo
+        #集群所在的命名空间
+        namespace: pg-project
+      spec:
+        #用于备份的本地存储的设置
+        BackrestStorage:
+          accessmode: ReadWriteOnce
+          matchLabels: ""
+          name: ""
+          size: 1G
+          storageclass: ""
+          storagetype: dynamic
+          supplementalgroups: ""
+        PrimaryStorage:
+          accessmode: ReadWriteOnce
+          matchLabels: ""
+          name: hippo
+          size: 1G
+          storageclass: ""
+          storagetype: dynamic
+          supplementalgroups: ""
+        ReplicaStorage:
+          accessmode: ReadWriteOnce
+          matchLabels: ""
+          name: ""
+          size: 1G
+          storageclass: ""
+          storagetype: dynamic
+          supplementalgroups: ""
+        annotations: {}
+        #镜像的名称，不需要改动
+        ccpimage: radondb-postgres-gis-ha
+        #镜像仓库地址，不需要改动
+        ccpimageprefix: docker.io/radondb
+        #镜像的tag，支持用户选择，pg13版本则用centos8-13.3-3.0-4.7.1，12版本则用centos8-12.7-3.0-4.7.1,中间的3.0代表gis版本
+        ccpimagetag: centos8-13.3-3.0-4.7.1
+        clustername: hippo
+        #初始数据库名称，即用户创建集群后会默认创建此数据库
+        database: hippo
+        #exporter暴露的端口，不需要修改
+        exporterport: "9187"
+        limits: {}
+        name: hippo
+        pgDataSource:
+          restoreFrom: ""
+          restoreOpts: ""
+        #pgbadger端口
+        pgbadgerport: "10000"
+        pgoimageprefix: docker.io/radondb
+        podAntiAffinity:
+          default: preferred
+          pgBackRest: preferred
+          pgBouncer: preferred
+        #postgresql对外暴露的端口
+        port: "5432"
+        tolerations: []
+        #Postgrsql用户名
+        user: hippo
+        userlabels:
+          pgo-version: 4.7.1
+
+

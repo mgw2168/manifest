@@ -1,4 +1,4 @@
-package utils
+package sliceutil
 
 func RemoveString(slice []string, remove func(item string) bool) []string {
 	for i := 0; i < len(slice); i++ {

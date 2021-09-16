@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	sliceutil "github.com/kubesphere/controllers/utils"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -25,6 +26,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	applicationv1alpha1 "github.com/kubesphere/api/v1alpha1"
+)
+
+const (
+	operatorAppVersionFinalizer = "operatorapplication.application.kubesphere.io"
 )
 
 // OperatorApplicationVersionReconciler reconciles a OperatorApplicationVersion object
@@ -49,7 +54,33 @@ type OperatorApplicationVersionReconciler struct {
 func (r *OperatorApplicationVersionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = log.FromContext(ctx)
 
-	// your logic here
+	operatorAppVersion := &applicationv1alpha1.OperatorApplicationVersion{}
+	err := r.Client.Get(ctx, req.NamespacedName, operatorAppVersion)
+	if err != nil {
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	if operatorAppVersion.ObjectMeta.DeletionTimestamp.IsZero() {
+		// The object is not being deleted
+		if !sliceutil.ContainsString(operatorAppVersion.Finalizers, operatorAppVersionFinalizer) {
+			operatorAppVersion.Finalizers = append(operatorAppVersion.Finalizers, operatorAppVersionFinalizer)
+			err := r.Update(ctx, operatorAppVersion)
+			return ctrl.Result{}, err
+		}
+	} else {
+		// The object is being deleted
+		if sliceutil.ContainsString(operatorAppVersion.Finalizers, operatorAppVersionFinalizer) {
+			operatorAppVersion.Finalizers = sliceutil.RemoveString(operatorAppVersion.Finalizers, func(item string) bool {
+				if item == operatorAppVersionFinalizer {
+					return true
+				} else {
+					return false
+				}
+			})
+			err = r.Update(ctx, operatorAppVersion)
+			return ctrl.Result{}, err
+		}
+	}
 
 	return ctrl.Result{}, nil
 }
