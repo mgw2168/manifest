@@ -4,7 +4,7 @@ metadata:
   name: manifest-ck001
   namespace: ck-project
 spec:
-  kind: "ClickHouseInstallation"
+  kind: "ClickHouse"
   appVersion: "20.9"
   version: 2
   customResource: |
@@ -57,7 +57,7 @@ spec:
               layout:
                 # ClickHouse 分片数量，只支持增加，不支持减少。
                 # shards count can not scale in this value.
-                shardsCount: 2
+                shardsCount: 3
                 # ClickHouse 每个分片的副本数量，只支持在创建时进行修改。
                 # 要求创建后，不允许再改动该值。
                 # 同时希望前端可以限制该值在 1-3 之间配置。

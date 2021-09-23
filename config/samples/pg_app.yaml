@@ -1,0 +1,20 @@
+apiVersion: application.kubesphere.io/v1alpha1
+kind: OperatorApplication
+metadata:
+  name: postgresql
+spec:
+  # Add fields here
+  name: "PostgreSQL"
+  description: "PostgreSQL is a powerful, open source object-relational database system with over 30 years of active development that has earned it a strong reputation for reliability, feature robustness, and performance."
+  abstraction: |
+    - 介绍
+    - ClickHouse on QingCloud 是云化版本的ClickHouse集群应用
+    - 兼容目前ClickHouse所有支持的数据引擎
+    - 支持横向增加节点、集群节点升降配置等弹性功能
+    - test text
+  operator: "admin"
+  icon: "https://github.com/etcd-io/etcd/raw/master/logos/etcd-glyph-color.svg"
+  owner: "RadonDB"
+status:
+  latestVersion: "2.1.2[15]"
+  state: active

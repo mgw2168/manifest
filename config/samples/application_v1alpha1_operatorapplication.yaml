@@ -1,12 +1,14 @@
 apiVersion: application.kubesphere.io/v1alpha1
 kind: OperatorApplication
 metadata:
-  name: app-xxx123xy
+  name: operator-app-clickhouse
+  namespace: kubesphere-system
 spec:
   # Add fields here
-  name: "ClickHouseInstallation"
+  name: "ClickHouse"
   description: "ClickHouse Database, the high performance columnar database."
-  owner: "admin"
+  operator: "admin"
   icon: "https://github.com/etcd-io/etcd/raw/master/logos/etcd-glyph-color.svg"
 status:
+  latestVersion: "1.1.5[20.9]"
   state: active

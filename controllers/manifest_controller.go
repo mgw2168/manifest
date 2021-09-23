@@ -27,7 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"time"
 
-	"github.com/kubesphere/api/v1alpha1"
+	"github.com/kubesphere/api/application/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -77,14 +77,14 @@ func (r *ManifestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	if customResource.ObjectMeta.DeletionTimestamp.IsZero() {
 		// The object is not being deleted
-		if !sliceutil.ContainsString(customResource.ObjectMeta.Finalizers, finalizer) {
+		if !sliceutil.HasString(customResource.ObjectMeta.Finalizers, finalizer) {
 			customResource.ObjectMeta.Finalizers = append(customResource.ObjectMeta.Finalizers, finalizer)
 			err := r.Update(ctx, customResource)
 			return reconcile.Result{}, err
 		}
 	} else {
 		// The object is being deleted
-		if sliceutil.ContainsString(customResource.ObjectMeta.Finalizers, finalizer) {
+		if sliceutil.HasString(customResource.ObjectMeta.Finalizers, finalizer) {
 			err := r.deleteCluster(ctx, customResource)
 			if err != nil {
 				klog.Errorf("delete database cluster error: %s", client.IgnoreNotFound(err).Error())
@@ -175,13 +175,13 @@ func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alp
 	resource.Status.Version = resource.Spec.Version
 	switch resource.Kind {
 	case v1alpha1.DBTypeClickHouse:
-		resource.Spec.App = v1alpha1.ClusterAppTypeClickHouse
+		resource.Spec.AppName = v1alpha1.ClusterAppTypeClickHouse
 	case v1alpha1.DBTypePostgreSQL:
-		resource.Spec.App = v1alpha1.ClusterAPPTypePostgreSQL
+		resource.Spec.AppName = v1alpha1.ClusterAPPTypePostgreSQL
 	case v1alpha1.DBTypeMysql:
-		resource.Spec.App = v1alpha1.ClusterAPPTypeMySQL
+		resource.Spec.AppName = v1alpha1.ClusterAPPTypeMySQL
 	default:
-		resource.Spec.App = ""
+		resource.Spec.AppName = ""
 	}
 	err = r.Client.Status().Update(ctx, resource)
 	if err != nil {

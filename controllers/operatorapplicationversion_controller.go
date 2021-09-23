@@ -25,7 +25,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	applicationv1alpha1 "github.com/kubesphere/api/v1alpha1"
+	applicationv1alpha1 "github.com/kubesphere/api/application/v1alpha1"
 )
 
 const (
@@ -81,6 +81,12 @@ func (r *OperatorApplicationVersionReconciler) Reconcile(ctx context.Context, re
 			return ctrl.Result{}, err
 		}
 	}
+	// todo
+	/**
+	1.更新ownerReferences
+	2.关联manifest
+	4.删除app时删除相关的manifest
+	*/
 
 	return ctrl.Result{}, nil
 }

@@ -28,7 +28,7 @@ CODEGEN_PKG=${CODEGEN_PKG:-$(cd "${SCRIPT_ROOT}"; ls -d -1 ./vendor/k8s.io/code-
 #                  instead of the $GOPATH directly. For normal projects this can be dropped.
 bash "${CODEGEN_PKG}"/generate-groups.sh "client,informer,lister" \
   github.com/kubesphere/pkg/client github.com/kubesphere/api \
-  manifest:v1alpha1 \
+  application:v1alpha1 \
   --output-base "${SCRIPT_ROOT}" \
   --go-header-file ./hack/boilerplate.go.txt
 

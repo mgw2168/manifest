@@ -29,7 +29,7 @@ type ManifestSpec struct {
 	Kind string `json:"kind"`
 	// info from frontend
 	Description    string `json:"description,omitempty"`
-	App            string `json:"app,omitempty"`
+	AppName        string `json:"app"`
 	AppVersion     string `json:"appVersion"`
 	CustomResource string `json:"customResource" yaml:"customResource"`
 	// expected release version, when this version is not equal status.version, the release need upgrade
@@ -40,7 +40,7 @@ type ManifestSpec struct {
 // ManifestStatus defines the observed state of Manifest
 type ManifestStatus struct {
 	Status string `json:"status,omitempty"`
-	// current release version
+	// current manifest version
 	Version    int         `json:"version,omitempty"`
 	LastUpdate metav1.Time `json:"lastUpdate,omitempty"`
 }

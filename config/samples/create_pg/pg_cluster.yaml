@@ -13,7 +13,7 @@ metadata:
     pgouser: admin
   name: hippo
   #集群所在的命名空间
-  namespace: pgo
+  namespace: pg-project
 spec:
   #用于备份的本地存储的设置
   BackrestStorage:
@@ -71,3 +71,10 @@ spec:
   user: hippo
   userlabels:
     pgo-version: 4.7.1
+  resources:
+    requests:
+      cpu: "1"
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 256Mi

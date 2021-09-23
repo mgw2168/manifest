@@ -1,0 +1,25 @@
+apiVersion: application.kubesphere.io/v1alpha1
+kind: OperatorApplicationVersion
+metadata:
+  name: clickhouse
+  labels:
+    application.kubesphere.io/operator-app: clickhouse
+spec:
+  name: "ClickHouse"
+  description: |
+    - ClickHouse on QingCloud 是云化版本的ClickHouse集群应用
+    - 兼容目前ClickHouse所有支持的数据引擎
+    - 支持横向增加节点、集群节点升降配置等弹性功能
+    - test text
+  screenshots: |
+    - https://github.com/radondb/radondb-clickhouse-kubernetes/raw/main/document/_images/logo_radondb.svg
+    - https://github.com/radondb/radondb-clickhouse-kubernetes/raw/main/document/_images/logo_radondb.svg
+    - https://github.com/radondb/radondb-clickhouse-kubernetes/raw/main/document/_images/logo_radondb.svg
+  changeLog:
+    "Distributed引擎支持currentDatabase函数|增强备份恢复功能"
+  operatorVersion: "1.0.1"
+  appVersion: "20.1"
+  icon: "/assets/click-house-green.svg"
+  owner: "RadonDB"
+status:
+  state: active

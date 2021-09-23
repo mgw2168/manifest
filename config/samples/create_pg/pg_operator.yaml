@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: pgo-deployer-sa
-  namespace: pgo
+  namespace: pg-project
   labels:
     vendor: radondb
 ---
@@ -123,7 +123,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: pgo-deployer-cm
-  namespace: pgo
+  namespace: pg-project
   labels:
     vendor: radondb
 data:
@@ -168,7 +168,7 @@ data:
     reconcile_rbac: "true"
     exporterport: "9187"
     metrics: "false"
-    namespace: "pgo"
+    namespace: "pg-project"
     namespace_mode: "dynamic"
     pgbadgerport: "10000"
     pgo_add_os_ca_store: "false"
@@ -191,7 +191,7 @@ data:
     pgo_image_tag: "centos8-4.7.1"
     pgo_installation_name: "devtest"
     pgo_noauth_routes: ""
-    pgo_operator_namespace: "pgo"
+    pgo_operator_namespace: "pg-project"
     pgo_tls_ca_store: ""
     pgo_tls_no_verify: "false"
     pod_anti_affinity: "preferred"
@@ -264,13 +264,13 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: pgo-deployer-sa
-    namespace: pgo
+    namespace: pg-project
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: pgo-deploy
-  namespace: pgo
+  namespace: pg-project
   labels:
     vendor: radondb
 spec:

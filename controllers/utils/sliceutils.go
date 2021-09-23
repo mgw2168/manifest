@@ -10,7 +10,7 @@ func RemoveString(slice []string, remove func(item string) bool) []string {
 	return slice
 }
 
-func ContainsString(slice []string, str string) bool {
+func HasString(slice []string, str string) bool {
 	for _, s := range slice {
 		if s == str {
 			return true

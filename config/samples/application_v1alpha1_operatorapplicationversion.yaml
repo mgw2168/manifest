@@ -1,20 +1,18 @@
 apiVersion: application.kubesphere.io/v1alpha1
 kind: OperatorApplicationVersion
 metadata:
-  name: appv-xr4m0jlxlp3j47
-  ownerReferences:
-    - apiVersion: application.kubesphere.io/v1alpha1
-      kind: OperatorApplication
-      name: app-xxx123xy
+  name: operator-app-version-clickhouse
+  labels:
+    application.kubesphere.io/operator-app: ClickHouse
 spec:
-  name: clickhouse
-  OperatorVersion: 2.0
-  versionLog:
-    - version: 2.0
-      updateLog: "Operator支持Zookeeper部署"
-    - version: 1.0
-      updateLog: "helm 版本xxx"
-  appVersion: 20.9
-  createTime: "2021-09-06T10:50:28.000+08:00"
+  name: "ClickHouse"
+  introduce:
+    "ClickHouse on QingCloud 是云化版本的ClickHouse集群应用。 兼容目前ClickHouse所有支持的数据引擎。 支持横向增加节点、集群节点升降配置等弹性功能"
+  graph:
+    - https://github.com/radondb/radondb-clickhouse-kubernetes/raw/main/document/_images/logo_radondb.svg
+    - https://github.com/radondb/radondb-clickhouse-kubernetes/raw/main/document/_images/logo_radondb.svg
+    - https://github.com/radondb/radondb-clickhouse-kubernetes/raw/main/document/_images/logo_radondb.svg
+  changeLog:
+    "Distributed引擎支持currentDatabase函数|增强备份恢复功能"
 status:
   state: active

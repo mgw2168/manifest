@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"fmt"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -26,22 +27,28 @@ import (
 // OperatorApplicationVersionSpec defines the desired state of OperatorApplicationVersion
 type OperatorApplicationVersionSpec struct {
 	// the name of the operator
-	AppName         string       `json:"appName"`
-	OperatorVersion string       `json:"operatorVersion"`
-	AppVersion      string       `json:"appVersion"`
-	ChangeLog       string       `json:"changeLog"`
-	CreateTime      *metav1.Time `json:"createTime"`
+	AppName string `json:"name"`
+	// name of the manifest
+	Description     string `json:"description"`
+	Screenshots     string `json:"screenshots,omitempty"`
+	ChangeLog       string `json:"changeLog"`
+	OperatorVersion string `json:"operatorVersion"`
+	AppVersion      string `json:"appVersion"`
+	Icon            string `json:"icon,omitempty"`
+	Owner           string `json:"owner,omitempty"`
 }
 
 // OperatorApplicationVersionStatus defines the observed state of OperatorApplicationVersion
 type OperatorApplicationVersionStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	State string `json:"state,omitempty"`
 }
 
 //+genclient
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:resource:scope=Cluster,shortName=oappver
+// +genclient:nonNamespaced
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // OperatorApplicationVersion is the Schema for the operatorapplicationversions API
 type OperatorApplicationVersion struct {
@@ -63,4 +70,13 @@ type OperatorApplicationVersionList struct {
 
 func init() {
 	SchemeBuilder.Register(&OperatorApplicationVersion{}, &OperatorApplicationVersionList{})
+}
+
+func (in *OperatorApplicationVersion) GetVersionName() string {
+	appV := in.Spec.AppVersion
+	if appV != "" {
+		return fmt.Sprintf("%s [%s]", in.Spec.OperatorVersion, appV)
+	} else {
+		return in.Spec.AppVersion
+	}
 }

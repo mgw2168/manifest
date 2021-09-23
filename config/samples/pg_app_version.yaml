@@ -1,0 +1,21 @@
+apiVersion: application.kubesphere.io/v1alpha1
+kind: OperatorApplicationVersion
+metadata:
+  name: postgresql
+  labels:
+    application.kubesphere.io/operator-app: postgresql
+spec:
+  name: "PostgreSQL"
+  description: "您可以像单节点一样使用、管理整个云端集群。 集群支持千亿条结构化数据毫秒级查询，查询结果支持自定义图形化展现。 支持横向增加节点、集群节点升降配置等弹性功能"
+  screenshots: |
+    - https://github.com/radondb/radondb-clickhouse-kubernetes/raw/main/document/_images/logo_radondb.svg
+    - https://github.com/radondb/radondb-clickhouse-kubernetes/raw/main/document/_images/logo_radondb.svg
+    - https://github.com/radondb/radondb-clickhouse-kubernetes/raw/main/document/_images/logo_radondb.svg
+  changeLog:
+    "Distributed引擎支持currentDatabase函数|增强备份恢复功能"
+  operatorVersion: "1.1.0"
+  appVersion: "15.6"
+  icon: "/assets/postgre-green.svg"
+  owner: "RadonDB"
+status:
+  state: active

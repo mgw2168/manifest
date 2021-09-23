@@ -18,7 +18,7 @@ package controllers
 
 import (
 	"context"
-	applicationv1alpha1 "github.com/kubesphere/api/v1alpha1"
+	applicationv1alpha1 "github.com/kubesphere/api/application/v1alpha1"
 	sliceutil "github.com/kubesphere/controllers/utils"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -52,7 +52,6 @@ type OperatorApplicationReconciler struct {
 func (r *OperatorApplicationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = log.FromContext(ctx)
 
-	// your logic here
 	/**
 	app中创建APP，同时创建APPversion
 	APPversion创建关联manifest
@@ -73,6 +72,15 @@ func (r *OperatorApplicationReconciler) Reconcile(ctx context.Context, req ctrl.
 	} else {
 		// The object is being deleted
 		if sliceutil.ContainsString(operatorApp.Finalizers, operatorAppFinalizer) {
+			// todo
+			/**
+			1.更新state
+			2.更新statusTime
+			3.更新updateTime
+			4.更新latestVersion （APPVersion中做）
+			4.删除app时删除相关的APPversion和manifest
+			*/
+
 			operatorApp.Finalizers = sliceutil.RemoveString(operatorApp.Finalizers, func(item string) bool {
 				if item == operatorAppFinalizer {
 					return true

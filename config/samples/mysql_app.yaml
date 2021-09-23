@@ -1,0 +1,14 @@
+apiVersion: application.kubesphere.io/v1alpha1
+kind: OperatorApplication
+metadata:
+  name: clickhouse
+spec:
+  # Add fields here
+  name: "ClickHouse"
+  description: "ClickHouse Database, the high performance columnar database."
+  operator: "admin"
+  icon: "https://github.com/etcd-io/etcd/raw/master/logos/etcd-glyph-color.svg"
+  owner: "RadonDB"
+status:
+  latestVersion: "1.1.5[20.9]"
+  state: active
