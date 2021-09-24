@@ -22,9 +22,9 @@ import (
 	sync "sync"
 	time "time"
 
-	versioned "manifest/pkg/client/clientset/versioned"
-	application "manifest/pkg/client/informers/externalversions/application"
-	internalinterfaces "manifest/pkg/client/informers/externalversions/internalinterfaces"
+	versioned "github.com/manifest/pkg/client/clientset/versioned"
+	application "github.com/manifest/pkg/client/informers/externalversions/application"
+	internalinterfaces "github.com/manifest/pkg/client/informers/externalversions/internalinterfaces"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

@@ -18,8 +18,8 @@ package controllers
 
 import (
 	"context"
-	applicationv1alpha1 "manifest/api/application/v1alpha1"
-	sliceutil "manifest/controllers/utils"
+	applicationv1alpha1 "github.com/manifest/api/application/v1alpha1"
+	sliceutil "github.com/manifest/controllers/utils"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"

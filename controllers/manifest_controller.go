@@ -23,8 +23,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog"
-	"manifest/api/application/v1alpha1"
-	"manifest/controllers/utils"
+	"github.com/manifest/api/application/v1alpha1"
+	"github.com/manifest/controllers/utils"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"time"
 

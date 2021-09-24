@@ -18,8 +18,8 @@ limitations under the License.
 package application
 
 import (
-	v1alpha1 "manifest/pkg/client/informers/externalversions/application/v1alpha1"
-	internalinterfaces "manifest/pkg/client/informers/externalversions/internalinterfaces"
+	v1alpha1 "github.com/manifest/pkg/client/informers/externalversions/application/v1alpha1"
+	internalinterfaces "github.com/manifest/pkg/client/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to each of this group's versions.

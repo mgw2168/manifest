@@ -18,9 +18,9 @@ limitations under the License.
 package fake
 
 import (
-	clientset "manifest/pkg/client/clientset/versioned"
-	applicationv1alpha1 "manifest/pkg/client/clientset/versioned/typed/application/v1alpha1"
-	fakeapplicationv1alpha1 "manifest/pkg/client/clientset/versioned/typed/application/v1alpha1/fake"
+	clientset "github.com/manifest/pkg/client/clientset/versioned"
+	applicationv1alpha1 "github.com/manifest/pkg/client/clientset/versioned/typed/application/v1alpha1"
+	fakeapplicationv1alpha1 "github.com/manifest/pkg/client/clientset/versioned/typed/application/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
