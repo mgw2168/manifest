@@ -18,14 +18,14 @@ package controllers
 
 import (
 	"context"
-	sliceutil "github.com/kubesphere/controllers/utils"
+	applicationv1alpha1 "manifest/api/application/v1alpha1"
+	sliceutil "manifest/controllers/utils"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	applicationv1alpha1 "github.com/kubesphere/api/application/v1alpha1"
 )
 
 const (
@@ -62,14 +62,14 @@ func (r *OperatorApplicationVersionReconciler) Reconcile(ctx context.Context, re
 
 	if operatorAppVersion.ObjectMeta.DeletionTimestamp.IsZero() {
 		// The object is not being deleted
-		if !sliceutil.ContainsString(operatorAppVersion.Finalizers, operatorAppVersionFinalizer) {
+		if !sliceutil.HasString(operatorAppVersion.Finalizers, operatorAppVersionFinalizer) {
 			operatorAppVersion.Finalizers = append(operatorAppVersion.Finalizers, operatorAppVersionFinalizer)
 			err := r.Update(ctx, operatorAppVersion)
 			return ctrl.Result{}, err
 		}
 	} else {
 		// The object is being deleted
-		if sliceutil.ContainsString(operatorAppVersion.Finalizers, operatorAppVersionFinalizer) {
+		if sliceutil.HasString(operatorAppVersion.Finalizers, operatorAppVersionFinalizer) {
 			operatorAppVersion.Finalizers = sliceutil.RemoveString(operatorAppVersion.Finalizers, func(item string) bool {
 				if item == operatorAppVersionFinalizer {
 					return true

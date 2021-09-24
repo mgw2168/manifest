@@ -84,7 +84,7 @@ spec:
               status:
                 type: string
               version:
-                description: current release version
+                description: current manifest version
                 type: integer
             type: object
         type: object

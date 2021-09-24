@@ -18,8 +18,8 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/kubesphere/api/application/v1alpha1"
-	"github.com/kubesphere/pkg/client/clientset/versioned/scheme"
+	v1alpha1 "manifest/api/application/v1alpha1"
+	"manifest/pkg/client/clientset/versioned/scheme"
 	rest "k8s.io/client-go/rest"
 )
 

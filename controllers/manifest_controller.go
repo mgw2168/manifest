@@ -18,16 +18,16 @@ package controllers
 
 import (
 	"context"
-	"github.com/kubesphere/controllers/utils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog"
+	"manifest/api/application/v1alpha1"
+	"manifest/controllers/utils"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"time"
 
-	"github.com/kubesphere/api/application/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -141,6 +141,7 @@ func (r *ManifestReconciler) deleteCluster(ctx context.Context, resource *v1alph
 
 	obj, err := getUnstructuredObj(resource)
 	if err != nil {
+		klog.Errorf("get unstructured object error: %s", err.Error())
 		return err
 	}
 	err = r.Delete(ctx, obj)
