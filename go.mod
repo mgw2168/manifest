@@ -1,4 +1,4 @@
-module manifest
+module github.com/manifest
 
 go 1.16
 
