@@ -27,9 +27,7 @@ import (
 // OperatorApplicationVersionSpec defines the desired state of OperatorApplicationVersion
 type OperatorApplicationVersionSpec struct {
 	// the name of the operator
-	AppName string `json:"name"`
-	// name of the manifest
-	Description     string `json:"description"`
+	AppName         string `json:"name"`
 	Screenshots     string `json:"screenshots,omitempty"`
 	ChangeLog       string `json:"changeLog"`
 	OperatorVersion string `json:"operatorVersion"`

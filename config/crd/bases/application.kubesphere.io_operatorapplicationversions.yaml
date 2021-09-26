@@ -44,9 +44,6 @@ spec:
                 type: string
               changeLog:
                 type: string
-              description:
-                description: name of the manifest
-                type: string
               icon:
                 type: string
               name:
@@ -61,7 +58,6 @@ spec:
             required:
             - appVersion
             - changeLog
-            - description
             - name
             - operatorVersion
             type: object

@@ -18,13 +18,13 @@ package controllers
 
 import (
 	"context"
+	"github.com/manifest/api/application/v1alpha1"
+	"github.com/manifest/controllers/utils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog"
-	"github.com/manifest/api/application/v1alpha1"
-	"github.com/manifest/controllers/utils"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"time"
 
@@ -232,7 +232,12 @@ func getUnstructuredObjStatus(obj *unstructured.Unstructured) string {
 	var clusterStatus string
 	statusMap, ok := obj.Object["status"].(map[string]interface{})
 	if ok {
-		clusterStatus = statusMap["status"].(string)
+		clusterStatus, ok = statusMap["status"].(string)
+		if ok {
+			return clusterStatus
+		} else {
+			clusterStatus = v1alpha1.ClusterStatusUnknown
+		}
 	} else {
 		clusterStatus = v1alpha1.ClusterStatusUnknown
 	}

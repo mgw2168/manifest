@@ -6,11 +6,6 @@ metadata:
     application.kubesphere.io/operator-app: clickhouse
 spec:
   name: "ClickHouse"
-  description: |
-    - ClickHouse on QingCloud 是云化版本的ClickHouse集群应用
-    - 兼容目前ClickHouse所有支持的数据引擎
-    - 支持横向增加节点、集群节点升降配置等弹性功能
-    - test text
   screenshots: |
     - https://github.com/radondb/radondb-clickhouse-kubernetes/raw/main/document/_images/logo_radondb.svg
     - https://github.com/radondb/radondb-clickhouse-kubernetes/raw/main/document/_images/logo_radondb.svg
