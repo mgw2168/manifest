@@ -3,17 +3,18 @@ kind: OperatorApplication
 metadata:
   name: mysql
 spec:
-  # Add fields here
+  # app name
   name: "MySQL"
+  # app description
   description: "mysql 是最流行的开源数据库，应用广泛，性能稳定。"
+  # app description
   abstraction: |
     - 介绍这个是mysql介绍
     - mysql介绍
     - mysql介绍
     - test text
   operator: "admin"
-  icon: "https://github.com/etcd-io/etcd/raw/master/logos/etcd-glyph-color.svg"
+  icon: "https://raw.githubusercontent.com/radondb/radondb-mysql-kubernetes/main/docs/images/logo_radondb-mysql.png"
   owner: "RadonDB"
 status:
-  latestVersion: "1.1.5[5.7]"
   state: active

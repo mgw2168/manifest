@@ -32,7 +32,6 @@ type OperatorApplicationVersionSpec struct {
 	ChangeLog       string `json:"changeLog"`
 	OperatorVersion string `json:"operatorVersion"`
 	AppVersion      string `json:"appVersion"`
-	Icon            string `json:"icon,omitempty"`
 	Owner           string `json:"owner,omitempty"`
 }
 

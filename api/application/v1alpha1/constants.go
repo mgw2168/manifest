@@ -1,7 +1,7 @@
 package v1alpha1
 
 const (
-	// helm chart status
+	// custom resource status
 	Creating = "creating"
 	Deleting = "deleting"
 	Failed   = "failed"
@@ -9,7 +9,7 @@ const (
 
 	// kind of operator cr
 	DBTypeClickHouse = "ClickHouseInstallation"
-	DBTypePostgreSQL = "Pgcluster"
+	DBTypePostgreSQL = "PostgreSQL"
 	DBTypeMysql      = "MySQL"
 
 	// type of the cluster application

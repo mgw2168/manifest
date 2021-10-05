@@ -18,8 +18,7 @@ package controllers
 
 import (
 	"context"
-	"github.com/manifest/api/application/v1alpha1"
-	"github.com/manifest/controllers/utils"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
@@ -28,6 +27,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"time"
 
+	"github.com/manifest/api/application/v1alpha1"
+	"github.com/manifest/controllers/utils"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -65,6 +66,9 @@ func (r *ManifestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	customResource := &v1alpha1.Manifest{}
 	if err := r.Get(ctx, req.NamespacedName, customResource); err != nil {
+		if errors.IsAlreadyExists(err) {
+			return ctrl.Result{}, err
+		}
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
@@ -145,7 +149,7 @@ func (r *ManifestReconciler) deleteCluster(ctx context.Context, resource *v1alph
 		return err
 	}
 	err = r.Delete(ctx, obj)
-	return err
+	return client.IgnoreNotFound(err)
 }
 
 func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alpha1.Manifest) error {
@@ -232,7 +236,7 @@ func getUnstructuredObjStatus(obj *unstructured.Unstructured) string {
 	var clusterStatus string
 	statusMap, ok := obj.Object["status"].(map[string]interface{})
 	if ok {
-		clusterStatus, ok = statusMap["status"].(string)
+		clusterStatus, ok = statusMap["state"].(string)
 		if ok {
 			return clusterStatus
 		} else {
@@ -246,6 +250,9 @@ func getUnstructuredObjStatus(obj *unstructured.Unstructured) string {
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *ManifestReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	if r.Client == nil {
+		r.Client = mgr.GetClient()
+	}
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.Manifest{}).
 		Complete(r)

@@ -1,0 +1,30 @@
+apiVersion: application.kubesphere.io/v1alpha1
+kind: Manifest
+metadata:
+  name: manifest-pg
+  namespace: xxzz
+spec:
+  kind: "PostgreSQL"
+  appVersion: "12.0"
+  version: 1
+  customResource: |
+    apiVersion: pgcluster.kubesphere.io/v1alpha1
+    kind: PostgreSQLCluster
+    metadata:
+      name: postgresqlcluster-sample
+    spec:
+      # create cluster
+      clientVersion: "4.7.1"
+      name: "test001"
+      namespace: "xxzz"
+      syncReplication: true
+      ccpImage: ""
+      ccpImageTag: ""
+      replicaCount: 1
+      cpuLimit: "1"
+      cpuRequest: "1"
+      memoryLimit: "1Gi"
+      memoryRequest: "1Gi"
+      database: "db1"
+      username: "pguser1"
+      password: "pass1"

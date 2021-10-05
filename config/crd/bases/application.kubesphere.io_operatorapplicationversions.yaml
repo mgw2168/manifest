@@ -44,8 +44,6 @@ spec:
                 type: string
               changeLog:
                 type: string
-              icon:
-                type: string
               name:
                 description: the name of the operator
                 type: string

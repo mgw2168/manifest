@@ -1,0 +1,29 @@
+apiVersion: application.kubesphere.io/v1alpha1
+kind: Manifest
+metadata:
+  name: manifest-pg-update-user
+  namespace: pgtest
+spec:
+  kind: "PostgreSQL"
+  appVersion: "12.0"
+  version: 1
+  customResource: |
+    apiVersion: pgcluster.kubesphere.io/v1alpha1
+    kind: PostgreSQLCluster
+    metadata:
+      name: postgresqlcluster-sample
+    spec:
+      # update user
+      action: "update_user"
+      clientVersion: "4.7.1"
+      namespace: "pgtest"
+      selector: ""
+      allFlag: false
+      clusterName:
+        - "test001"
+      username: "mgw"
+      password: "123456789"
+      passwordAgeDays: 86400
+      passwordLength: 8
+      passwordType: "md5"
+      setSystemAccountPassword: false

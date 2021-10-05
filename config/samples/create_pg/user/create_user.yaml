@@ -1,0 +1,27 @@
+apiVersion: application.kubesphere.io/v1alpha1
+kind: Manifest
+metadata:
+  name: manifest-pg-create-user-1
+  namespace: pgtest
+spec:
+  kind: "PostgreSQL"
+  appVersion: "12.0"
+  version: 1
+  customResource: |
+    apiVersion: pgcluster.kubesphere.io/v1alpha1
+    kind: PostgreSQLCluster
+    metadata:
+      name: postgresqlcluster-sample
+    spec:
+      # delete cluster
+      action: "create_user"
+      clientVersion: "4.7.1"
+      namespace: "pgtest"
+      clusterName:
+        - "test001"
+      managedUser: true
+      passwordAgeDays: 86400
+      passwordLength: 8
+      passwordType: "md5"
+      username: "mgw"
+      password: "123456"

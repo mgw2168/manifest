@@ -1,0 +1,23 @@
+apiVersion: application.kubesphere.io/v1alpha1
+kind: Manifest
+metadata:
+  name: manifest-pg-show-user
+  namespace: pgtest
+spec:
+  kind: "PostgreSQL"
+  appVersion: "12.0"
+  version: 1
+  customResource: |
+    apiVersion: pgcluster.kubesphere.io/v1alpha1
+    kind: PostgreSQLCluster
+    metadata:
+      name: postgresqlcluster-sample
+    spec:
+      # delete cluster
+      action: "show_user"
+      clientVersion: "4.7.1"
+      namespace: "pgtest"
+      clusterName:
+        - "test001"
+      allFlag: false
+      showSystemAccounts: true

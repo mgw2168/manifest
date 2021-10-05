@@ -60,12 +60,8 @@ spec:
           status:
             description: OperatorApplicationStatus defines the observed state of OperatorApplication
             properties:
-              latestVersion:
-                type: string
               state:
                 type: string
-            required:
-            - latestVersion
             type: object
         type: object
     served: true

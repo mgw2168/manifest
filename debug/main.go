@@ -1,31 +1,24 @@
 package main
 
+import (
+	"fmt"
+	"time"
+)
+
 func main() {
-	/**
-	  http://139.198.174.152:8000/kapis/openpitrix.io/v1/apps?orderBy=create_time&paging=limit=13,page=1&conditions=status=active,repo_id=repo-operator&reverse=true
+	format := "2006-01-02 15:04:05"
+	now := time.Now()
+	//now, _ := time.Parse(format, time.Now().Format(format))
+	a, _ := time.Parse(format, "2015-03-10 11:00:00")
+	b, _ := time.Parse(format, "2015-03-10 16:00:00")
 
-	*/
-
-	//repoId := conditions.Match[RepoId]
-	//if strings.HasSuffix(repoId, OperatorAppSuffix) {
-	//	// todo operator app
-	//	apps, err := c.listOperatorApps()
-	//	if err != nil {
-	//		klog.Error(err)
-	//		return nil, err
-	//	}
-	//	totalCount := len(apps)
-	//	items := make([]interface{}, 0, len(apps))
-	//
-	//	for i := range apps {
-	//		items = append(items, map[string]interface{}{
-	//			"name": apps[i].Name,
-	//			"owner": apps[i].Spec.Description,
-	//			"version": apps[i].Status.LatestVersion,
-	//		})
-	//	}
-	//	return &models.PageableResponse{Items: items, TotalCount: totalCount}, nil
-	//}
+	fmt.Println(now.Format(format), a.Format(format), b.Format(format))
+	fmt.Println(now.After(a))
+	fmt.Println(now.Before(a))
+	fmt.Println(now.After(b))
+	fmt.Println(now.Before(b))
+	fmt.Println(a.After(b))
+	fmt.Println(a.Before(b))
+	fmt.Println(now.Format(format), a.Format(format), b.Format(format))
+	fmt.Println(now.Unix(), a.Unix(), b.Unix())
 }
-
-//http://139.198.174.152:8000/kapis/openpitrix.io/v1/apps?orderBy=create_time&paging=limit=13,page=1&conditions=status=active,repo_id=repo-helm&reverse=true

@@ -13,8 +13,7 @@ spec:
     - 支持横向增加节点、集群节点升降配置等弹性功能
     - test text
   operator: "admin"
-  icon: "https://github.com/etcd-io/etcd/raw/master/logos/etcd-glyph-color.svg"
+  icon: "https://raw.githubusercontent.com/radondb/radondb-mysql-kubernetes/main/docs/images/logo_radondb-mysql.png"
   owner: "RadonDB"
 status:
-  latestVersion: "1.1.5[20.9]"
   state: active
