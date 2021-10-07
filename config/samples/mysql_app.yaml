@@ -6,13 +6,13 @@ spec:
   # app name
   name: "MySQL"
   # app description
-  description: "mysql 是最流行的开源数据库，应用广泛，性能稳定。"
+  description: "基于 MySQL 提供的企业级数据库服务，支持一主多从高可用架构，支持自动备份、监控告警、弹性伸缩、参数管理等数据库生命周期运维管理功能。"
   # app description
   abstraction: |
-    - 介绍这个是mysql介绍
-    - mysql介绍
-    - mysql介绍
-    - test text
+    - 金融级高可靠的 MySQL 集群；
+    - 主从开启 Semi-sync，严格保证节点间的数据一致性；
+    - 集群为一主多从架构，使用 Raft 协议管理集群主从节点，故障时可实现秒级主从切换，保障业务连续性；
+    - 提供自动备份、监控告警等功能；
   operator: "admin"
   icon: "https://raw.githubusercontent.com/radondb/radondb-mysql-kubernetes/main/docs/images/logo_radondb-mysql.png"
   owner: "RadonDB"

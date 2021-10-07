@@ -5,13 +5,12 @@ metadata:
 spec:
   # Add fields here
   name: "PostgreSQL"
-  description: "PostgreSQL is a powerful, open source object-relational database system with over 30 years of active development that has earned it a strong reputation for reliability, feature robustness, and performance."
+  description: "PostgreSQL 是备受业界青睐的关系型数据库，尤其是在地理空间和移动领域，具有自动备份、在线扩容以及监控告警等各种管理功能。"
   abstraction: |
-    - 介绍
-    - ClickHouse on QingCloud 是云化版本的ClickHouse集群应用
-    - 兼容目前ClickHouse所有支持的数据引擎
-    - 支持横向增加节点、集群节点升降配置等弹性功能
-    - test text
+    - 支持自动 Failover，提供HA功能；
+    - 提供PostgreSQL大部分常用参数修改接口，方便调整参数；
+    - 支持 PostGIS插件，为 PostgreSQL 提供了存储、查询和修改空间关系的能力；
+    - 提供实时监控、健康检查、日志自动清理等功能；
   operator: "admin"
   icon: "https://raw.githubusercontent.com/radondb/radondb-mysql-kubernetes/main/docs/images/logo_radondb-mysql.png"
   owner: "RadonDB"

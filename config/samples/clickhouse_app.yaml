@@ -5,13 +5,12 @@ metadata:
 spec:
   # Add fields here
   name: "ClickHouse"
-  description: "ClickHouse Database, the high performance columnar database."
+  description: "是一个分布式实时分析型列式存储数据库。具备高性能，支撑PB级数据，提供实时分析，稳定可扩展等特性。适用于数据仓库、BI报表、监控系统、互联网用户行为分析、广告投放业务以及工业、物联网等分析和时序应用场景。"
   abstraction: |
-    - 介绍
-    - ClickHouse on QingCloud 是云化版本的ClickHouse集群应用
-    - 兼容目前ClickHouse所有支持的数据引擎
-    - 支持横向增加节点、集群节点升降配置等弹性功能
-    - test text
+    - 支持横向增加节点、集群节点升降配置等弹性功能；
+    - 提供集群内数据重分布等高级集群管理功能；
+    - 您可以像单节点一样使用、管理整个集群。
+    - 集群支持千亿条结构化数据毫秒级查询，查询结果支持自定义图形化展现。
   operator: "admin"
   icon: "https://raw.githubusercontent.com/radondb/radondb-mysql-kubernetes/main/docs/images/logo_radondb-mysql.png"
   owner: "RadonDB"

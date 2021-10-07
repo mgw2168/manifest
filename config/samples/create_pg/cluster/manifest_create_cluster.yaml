@@ -1,7 +1,7 @@
 apiVersion: application.kubesphere.io/v1alpha1
 kind: Manifest
 metadata:
-  name: manifest-pg-cluster01
+  name: pg-cluster-xx0
   namespace: pgtest
 spec:
   kind: "PostgreSQL"
@@ -16,12 +16,12 @@ spec:
       # create cluster
       action: "create_cluster"
       clientVersion: "4.7.1"
-      name: "test001"
+      name: "pg-cluster-xx0"
       namespace: "pgtest"
       syncReplication: true
       ccpImage: ""
       ccpImageTag: ""
-      replicaCount: 1
+      replicaCount: 2
       cpuLimit: "500m"
       cpuRequest: "500m"
       memoryLimit: "500Mi"

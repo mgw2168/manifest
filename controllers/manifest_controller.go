@@ -25,6 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"strings"
 	"time"
 
 	"github.com/manifest/api/application/v1alpha1"
@@ -35,7 +36,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-const CheckTime = 1 * time.Minute
+const CheckTime = 30 * time.Second
 
 var (
 	decUnstructured = yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
@@ -148,6 +149,19 @@ func (r *ManifestReconciler) deleteCluster(ctx context.Context, resource *v1alph
 		klog.Errorf("get unstructured object error: %s", err.Error())
 		return err
 	}
+
+	resourceKind := obj.GetKind()
+	if strings.ToLower(resourceKind) == "postgresqlcluster" {
+		// delete pgcluster
+		pgcluster := obj.DeepCopy()
+		pgcluster.SetKind("Pgcluster")
+		pgcluster.SetAPIVersion("radondb.com/v1")
+		err = r.Delete(ctx, pgcluster)
+		if err != nil {
+			klog.Errorf("delete pgcluster resource error: %s", err.Error())
+		}
+	}
+
 	err = r.Delete(ctx, obj)
 	return client.IgnoreNotFound(err)
 }
@@ -175,7 +189,14 @@ func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alp
 		return err
 	}
 
-	clusterStatus := getUnstructuredObjStatus(obj)
+	var clusterStatus string
+	resourceKind := obj.GetKind()
+	if resourceKind == "PostgreSQLCluster" {
+		clusterStatus, err = r.getPgClusterStatus(ctx, obj)
+	} else {
+		clusterStatus = getUnstructuredObjStatus(obj)
+	}
+
 	resource.Status.Status = clusterStatus
 	resource.Status.Version = resource.Spec.Version
 	switch resource.Kind {
@@ -210,7 +231,13 @@ func (r *ManifestReconciler) checkResourceStatus(ctx context.Context, resource *
 		klog.V(1).Info(err.Error())
 	}
 
-	clusterStatus := getUnstructuredObjStatus(obj)
+	var clusterStatus string
+	resourceKind := obj.GetKind()
+	if resourceKind == "PostgreSQLCluster" {
+		clusterStatus, err = r.getPgClusterStatus(ctx, obj)
+	} else {
+		clusterStatus = getUnstructuredObjStatus(obj)
+	}
 
 	resource.Status.Status = clusterStatus
 	err = r.Client.Status().Update(ctx, resource)
@@ -221,6 +248,21 @@ func (r *ManifestReconciler) checkResourceStatus(ctx context.Context, resource *
 	return ctrl.Result{RequeueAfter: CheckTime}, err
 }
 
+func (r *ManifestReconciler) getPgClusterStatus(ctx context.Context, obj *unstructured.Unstructured) (string, error) {
+	var pgClusterStatus string
+	obj.SetKind("Pgcluster")
+	obj.SetAPIVersion("radondb.com/v1")
+	err := r.Get(ctx, types.NamespacedName{
+		Namespace: obj.GetNamespace(),
+		Name:      obj.GetName(),
+	}, obj)
+	if err != nil {
+		klog.Errorf("get Pgcluster resource error: %s", err.Error())
+		return "", err
+	}
+	pgClusterStatus = getUnstructuredObjStatus(obj)
+	return pgClusterStatus, nil
+}
 func getUnstructuredObj(resource *v1alpha1.Manifest) (obj *unstructured.Unstructured, err error) {
 	obj = &unstructured.Unstructured{}
 	_, _, err = decUnstructured.Decode([]byte(resource.Spec.CustomResource), nil, obj)
@@ -253,6 +295,10 @@ func (r *ManifestReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	if r.Client == nil {
 		r.Client = mgr.GetClient()
 	}
+	if r.Scheme == nil {
+		r.Scheme = mgr.GetScheme()
+	}
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.Manifest{}).
 		Complete(r)
