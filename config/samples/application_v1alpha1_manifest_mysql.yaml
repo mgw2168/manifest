@@ -2,7 +2,7 @@ apiVersion: application.kubesphere.io/v1alpha1
 kind: Manifest
 metadata:
   name: manifest-mysql
-  namespace: mysql-project
+  namespace: mysql-test
 spec:
   kind: "MySQL"
   appVersion: "5.7"
@@ -14,7 +14,7 @@ spec:
         name: sample
         namespace: mysql-project
       spec:
-        replicas: 3
+        replicas: 2
         mysqlVersion: "5.7"
 
         mysqlOpts:

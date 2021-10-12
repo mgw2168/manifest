@@ -44,6 +44,8 @@ spec:
                 type: string
               changeLog:
                 type: string
+              changeLog_en:
+                type: string
               name:
                 description: the name of the operator
                 type: string
@@ -52,6 +54,8 @@ spec:
               owner:
                 type: string
               screenshots:
+                type: string
+              screenshots_en:
                 type: string
             required:
             - appVersion

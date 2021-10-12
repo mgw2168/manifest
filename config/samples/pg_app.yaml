@@ -6,6 +6,7 @@ spec:
   # Add fields here
   name: "PostgreSQL"
   description: "PostgreSQL 是备受业界青睐的关系型数据库，尤其是在地理空间和移动领域，具有自动备份、在线扩容以及监控告警等各种管理功能。"
+  description_en: "PostgreSQL is hot relational database for the industry,,,,"
   abstraction: |
     - 支持自动 Failover，提供HA功能；
     - 提供PostgreSQL大部分常用参数修改接口，方便调整参数；

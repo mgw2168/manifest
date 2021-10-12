@@ -80,12 +80,6 @@ func (r *OperatorApplicationVersionReconciler) Reconcile(ctx context.Context, re
 			return ctrl.Result{}, err
 		}
 	}
-	// todo
-	/**
-	1.更新ownerReferences
-	2.关联manifest
-	4.删除app时删除相关的manifest
-	*/
 
 	return ctrl.Result{}, nil
 }

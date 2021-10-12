@@ -52,10 +52,6 @@ type OperatorApplicationReconciler struct {
 func (r *OperatorApplicationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = log.FromContext(ctx)
 
-	/**
-	app中创建APP，同时创建APPversion
-	APPversion创建关联manifest
-	*/
 	operatorApp := &applicationv1alpha1.OperatorApplication{}
 	err := r.Client.Get(ctx, req.NamespacedName, operatorApp)
 	if err != nil {
@@ -72,14 +68,6 @@ func (r *OperatorApplicationReconciler) Reconcile(ctx context.Context, req ctrl.
 	} else {
 		// The object is being deleted
 		if sliceutil.HasString(operatorApp.Finalizers, operatorAppFinalizer) {
-			// todo
-			/**
-			1.更新state
-			2.更新statusTime
-			3.更新updateTime
-			4.更新latestVersion （APPVersion中做）
-			4.删除app时删除相关的APPversion和manifest
-			*/
 
 			operatorApp.Finalizers = sliceutil.RemoveString(operatorApp.Finalizers, func(item string) bool {
 				if item == operatorAppFinalizer {

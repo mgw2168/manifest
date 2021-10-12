@@ -2,10 +2,13 @@ package v1alpha1
 
 const (
 	// custom resource status
-	Creating = "creating"
-	Deleting = "deleting"
-	Failed   = "failed"
-	Created  = "created"
+	Creating = "Creating"
+	Deleting = "Deleting"
+	Failed   = "Failed"
+	Error    = "Error"
+	Created  = "Created"
+
+	NamespaceLabelKey = "kubesphere.io/namespace"
 
 	// kind of operator cr
 	DBTypeClickHouse = "ClickHouseInstallation"
@@ -19,5 +22,6 @@ const (
 
 	// cluster status
 	ClusterStatusUnknown = "unknown"
-	// 状态更新异常
+	// suffix of secret name
+	SuffixSecretName = "-userpassword-secret"
 )

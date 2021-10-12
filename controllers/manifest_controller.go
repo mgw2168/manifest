@@ -18,14 +18,15 @@ package controllers
 
 import (
 	"context"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"strings"
 	"time"
 
 	"github.com/manifest/api/application/v1alpha1"
@@ -33,7 +34,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 const CheckTime = 30 * time.Second
@@ -128,7 +128,7 @@ func (r *ManifestReconciler) patchCluster(ctx context.Context, resource *v1alpha
 	err = r.Client.Patch(ctx, obj, client.Merge)
 	if err != nil {
 		klog.V(1).Info(err.Error())
-		return err
+		return client.IgnoreNotFound(err)
 	}
 
 	resource.Status.Version = resource.Spec.Version
@@ -151,14 +151,24 @@ func (r *ManifestReconciler) deleteCluster(ctx context.Context, resource *v1alph
 	}
 
 	resourceKind := obj.GetKind()
-	if strings.ToLower(resourceKind) == "postgresqlcluster" {
-		// delete pgcluster
-		pgcluster := obj.DeepCopy()
-		pgcluster.SetKind("Pgcluster")
-		pgcluster.SetAPIVersion("radondb.com/v1")
-		err = r.Delete(ctx, pgcluster)
+	if resourceKind == "PostgreSQLCluster" {
+		// delete pg cluster
+		pgCluster := obj.DeepCopy()
+		pgCluster.SetKind("Pgcluster")
+		pgCluster.SetAPIVersion("radondb.com/v1")
+		err = r.Delete(ctx, pgCluster)
 		if err != nil {
 			klog.Errorf("delete pgcluster resource error: %s", err.Error())
+		}
+	} else if resourceKind == "Cluster" {
+		// delete secret
+		err := r.createOrDeleteMysqlClusterPasswordSecret(ctx, resource, true)
+		if err != nil {
+			klog.Errorf("delete mysql password secret error")
+			resource.Status.Status = v1alpha1.Error
+			resource.Status.Condition = append(resource.Status.Condition, map[string]string{"name": resource.Name, "msg": err.Error()})
+			err = r.Status().Update(ctx, resource)
+			return err
 		}
 	}
 
@@ -175,7 +185,23 @@ func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alp
 
 	err = r.Create(ctx, obj)
 	if err != nil {
+		resource.Status.Status = v1alpha1.Error
+		resource.Status.Condition = append(resource.Status.Condition, map[string]string{"name": resource.Name, "msg": err.Error()})
+		err = r.Status().Update(ctx, resource)
 		return err
+	}
+
+	// mysql 的话创建secret，保存密码
+	var clusterStatus string
+	resourceKind := obj.GetKind()
+	if resourceKind == "Cluster" {
+		err := r.createOrDeleteMysqlClusterPasswordSecret(ctx, resource, false)
+		if err != nil {
+			resource.Status.Status = v1alpha1.Error
+			resource.Status.Condition = append(resource.Status.Condition, map[string]string{"name": resource.Name, "msg": err.Error()})
+			err = r.Status().Update(ctx, resource)
+			return err
+		}
 	}
 
 	time.Sleep(500 * time.Millisecond)
@@ -186,11 +212,9 @@ func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alp
 	}, obj)
 	if err != nil {
 		klog.Error(err, "get unstructured object error.")
-		return err
+		return client.IgnoreNotFound(err)
 	}
 
-	var clusterStatus string
-	resourceKind := obj.GetKind()
 	if resourceKind == "PostgreSQLCluster" {
 		clusterStatus, err = r.getPgClusterStatus(ctx, obj)
 	} else {
@@ -217,6 +241,25 @@ func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alp
 	return nil
 }
 
+func (r *ManifestReconciler) createOrDeleteMysqlClusterPasswordSecret(ctx context.Context, resource *v1alpha1.Manifest, delete bool) (err error) {
+	secret := &corev1.Secret{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "v1",
+			Kind:       "Secret",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      resource.Name + v1alpha1.SuffixSecretName,
+			Namespace: resource.Namespace,
+		},
+	}
+	if delete {
+		err = r.Client.Delete(ctx, secret)
+	} else {
+		err = r.Client.Create(ctx, secret)
+	}
+	return
+}
+
 func (r *ManifestReconciler) checkResourceStatus(ctx context.Context, resource *v1alpha1.Manifest) (ctrl.Result, error) {
 	klog.V(1).Infof("do check status: %s, %s, %s", resource.Namespace, resource.Name, resource.Spec.Kind)
 	obj, err := getUnstructuredObj(resource)
@@ -229,6 +272,7 @@ func (r *ManifestReconciler) checkResourceStatus(ctx context.Context, resource *
 		Name:      resource.Name}, obj)
 	if err != nil {
 		klog.V(1).Info(err.Error())
+		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
 	var clusterStatus string
@@ -258,7 +302,7 @@ func (r *ManifestReconciler) getPgClusterStatus(ctx context.Context, obj *unstru
 	}, obj)
 	if err != nil {
 		klog.Errorf("get Pgcluster resource error: %s", err.Error())
-		return "", err
+		return "", client.IgnoreNotFound(err)
 	}
 	pgClusterStatus = getUnstructuredObjStatus(obj)
 	return pgClusterStatus, nil

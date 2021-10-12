@@ -39,7 +39,8 @@ type ManifestSpec struct {
 
 // ManifestStatus defines the observed state of Manifest
 type ManifestStatus struct {
-	Status string `json:"status,omitempty"`
+	Status    string              `json:"status,omitempty"`
+	Condition []map[string]string `json:"condition,omitempty"`
 	// current manifest version
 	Version    int         `json:"version,omitempty"`
 	LastUpdate metav1.Time `json:"lastUpdate,omitempty"`

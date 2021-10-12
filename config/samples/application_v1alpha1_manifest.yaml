@@ -1,8 +1,8 @@
 apiVersion: application.kubesphere.io/v1alpha1
 kind: Manifest
 metadata:
-  name: manifest-ck001
-  namespace: ck-project
+  name: manifest-xxx
+  namespace: mysql-test
 spec:
   kind: "ClickHouse"
   appVersion: "20.9"

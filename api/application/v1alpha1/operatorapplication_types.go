@@ -28,11 +28,13 @@ type OperatorApplicationSpec struct {
 	// the name of the operator application
 	AppName string `json:"name"`
 	// description from operator's description or frontend
-	Description string `json:"description,omitempty"`
-	Abstraction string `json:"abstraction,omitempty"`
-	Operator    string `json:"operator"`
-	Icon        string `json:"icon,omitempty"`
-	Owner       string `json:"owner,omitempty"`
+	Description   string `json:"description,omitempty"`
+	DescriptionEn string `json:"description_en,omitempty"`
+	Abstraction   string `json:"abstraction,omitempty"`
+	AbstractionEn string `json:"abstraction_en,omitempty"`
+	Operator      string `json:"operator"`
+	Icon          string `json:"icon,omitempty"`
+	Owner         string `json:"owner,omitempty"`
 }
 
 // OperatorApplicationStatus defines the observed state of OperatorApplication

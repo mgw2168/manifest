@@ -13,7 +13,6 @@ spec:
     metadata:
       name: postgresqlcluster-sample
     spec:
-      # delete cluster
       action: "create_user"
       clientVersion: "4.7.1"
       namespace: "pgtest"
