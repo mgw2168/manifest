@@ -13,10 +13,7 @@ spec:
     metadata:
       name: postgresqlcluster-sample
     spec:
-      # delete cluster
-      action: "scaledown_cluster"
-      clientVersion: "4.7.1"
       namespace: "pgtest"
       name: "test001"
-      replicaName: "test001-kmfy"
-      delete-data: "true"
+      replicaName: "test001-ksdl"
+

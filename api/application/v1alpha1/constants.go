@@ -6,6 +6,7 @@ const (
 	Deleting = "Deleting"
 	Failed   = "Failed"
 	Error    = "Error"
+	AlreadyExists    = "AlreadyExists"
 	Created  = "Created"
 
 	NamespaceLabelKey = "kubesphere.io/namespace"

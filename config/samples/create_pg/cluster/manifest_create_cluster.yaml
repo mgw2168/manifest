@@ -11,21 +11,20 @@ spec:
     apiVersion: pgcluster.kubesphere.io/v1alpha1
     kind: PostgreSQLCluster
     metadata:
-      name: postgresqlcluster-sample
+      name: pg-test-01
+      namespace: pgtest
     spec:
-      # create cluster
-      action: "create_cluster"
       clientVersion: "4.7.1"
-      name: "pg-cluster-xx0"
+      name: "test001"
       namespace: "pgtest"
       syncReplication: true
       ccpImage: ""
       ccpImageTag: ""
-      replicaCount: 2
+      replicaCount: 1
       cpuLimit: "500m"
       cpuRequest: "500m"
-      memoryLimit: "500Mi"
-      memoryRequest: "500Mi"
+      memoryLimit: "1Gi"
+      memoryRequest: "1Gi"
       database: "db1"
       username: "pguser1"
       password: "pass1"

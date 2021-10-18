@@ -1,0 +1,16 @@
+apiVersion: application.kubesphere.io/v1alpha1
+kind: Manifest
+metadata:
+  name: postgre-0nmult
+  namespace: pgo
+  labels:
+    kubesphere.io/cluster: host
+    kubesphere.io/namespace: pgo
+  annotations:
+    kubesphere.io/creator: admin
+spec:
+  kind: PostgreSQLCluster
+  appVersion: '1.1.0 [15.6]'
+  version: 1
+  customResource: >-
+    {"apiVersion":"pgcluster.kubesphere.io/v1alpha1","kind":"PostgreSQLCluster","metadata":{"name":"postgre-0nmult","namespace":"pgo"},"spec":{"name":"postgre-0nmult","namespace":"pgo","syncReplication":true,"ccpImage":"","ccpImageTag":"","replicaCount":1,"cpuLimit":"500m","cpuRequest":"500m","memoryLimit":"1Gi","memoryRequest":"1Gi","database":"postgreSQL","username":"kubsphere","password":"Ks2020!","restart":false,"storageConfig":"csi-ssd-enterprise","replicaName":"","managedUser":true,"showSystemAccounts":true,"setSystemAccountPassword":false,"pvcSize":"10Gi"}}

@@ -73,6 +73,10 @@ func (r *ManifestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	if err := validateResourceName(customResource); err != nil {
+		return ctrl.Result{}, nil
+	}
+
 	if customResource.Status.Status == "" {
 		customResource.Status.Status = v1alpha1.Creating
 		customResource.Status.LastUpdate = metav1.Now()
@@ -106,7 +110,7 @@ func (r *ManifestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 	if customResource.Status.Status == v1alpha1.Creating {
 		if err := r.installCluster(ctx, customResource); err != nil {
-			return ctrl.Result{}, err
+			return ctrl.Result{Requeue: true}, err
 		}
 	} else if customResource.Status.Version != customResource.Spec.Version {
 		if err := r.patchCluster(ctx, customResource); err != nil {
@@ -125,7 +129,7 @@ func (r *ManifestReconciler) patchCluster(ctx context.Context, resource *v1alpha
 	if err != nil {
 		return err
 	}
-	err = r.Client.Patch(ctx, obj, client.Merge)
+	err = r.Client.Update(ctx, obj)
 	if err != nil {
 		klog.V(1).Info(err.Error())
 		return client.IgnoreNotFound(err)
@@ -164,9 +168,8 @@ func (r *ManifestReconciler) deleteCluster(ctx context.Context, resource *v1alph
 		// delete secret
 		err := r.createOrDeleteMysqlClusterPasswordSecret(ctx, resource, true)
 		if err != nil {
-			klog.Errorf("delete mysql password secret error")
+			klog.Errorf("delete mysql password secret error: %s", err)
 			resource.Status.Status = v1alpha1.Error
-			resource.Status.Condition = append(resource.Status.Condition, map[string]string{"name": resource.Name, "msg": err.Error()})
 			err = r.Status().Update(ctx, resource)
 			return err
 		}
@@ -185,10 +188,14 @@ func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alp
 
 	err = r.Create(ctx, obj)
 	if err != nil {
-		resource.Status.Status = v1alpha1.Error
-		resource.Status.Condition = append(resource.Status.Condition, map[string]string{"name": resource.Name, "msg": err.Error()})
-		err = r.Status().Update(ctx, resource)
-		return err
+		klog.Errorf("create cluster error: %s", err)
+		if errors.IsAlreadyExists(err) {
+			resource.Status.Status = v1alpha1.AlreadyExists
+		} else {
+			resource.Status.Status = v1alpha1.Error
+		}
+		//err = r.Status().Update(ctx, resource)
+		//return err
 	}
 
 	// mysql 的话创建secret，保存密码
@@ -197,8 +204,8 @@ func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alp
 	if resourceKind == "Cluster" {
 		err := r.createOrDeleteMysqlClusterPasswordSecret(ctx, resource, false)
 		if err != nil {
+			klog.Errorf("create secret error: %s", err)
 			resource.Status.Status = v1alpha1.Error
-			resource.Status.Condition = append(resource.Status.Condition, map[string]string{"name": resource.Name, "msg": err.Error()})
 			err = r.Status().Update(ctx, resource)
 			return err
 		}
@@ -216,10 +223,11 @@ func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alp
 	}
 
 	if resourceKind == "PostgreSQLCluster" {
-		clusterStatus, err = r.getPgClusterStatus(ctx, obj)
+		clusterStatus, _ = r.getPgClusterStatus(ctx, obj)
 	} else {
 		clusterStatus = getUnstructuredObjStatus(obj)
 	}
+	addObjCondition(obj, resource)
 
 	resource.Status.Status = clusterStatus
 	resource.Status.Version = resource.Spec.Version
@@ -264,7 +272,7 @@ func (r *ManifestReconciler) checkResourceStatus(ctx context.Context, resource *
 	klog.V(1).Infof("do check status: %s, %s, %s", resource.Namespace, resource.Name, resource.Spec.Kind)
 	obj, err := getUnstructuredObj(resource)
 	if err != nil {
-		return ctrl.Result{}, err
+		return ctrl.Result{RequeueAfter: CheckTime}, err
 	}
 
 	err = r.Get(ctx, types.NamespacedName{
@@ -272,17 +280,17 @@ func (r *ManifestReconciler) checkResourceStatus(ctx context.Context, resource *
 		Name:      resource.Name}, obj)
 	if err != nil {
 		klog.V(1).Info(err.Error())
-		return ctrl.Result{}, client.IgnoreNotFound(err)
+		return ctrl.Result{RequeueAfter: CheckTime}, err
 	}
 
 	var clusterStatus string
 	resourceKind := obj.GetKind()
 	if resourceKind == "PostgreSQLCluster" {
-		clusterStatus, err = r.getPgClusterStatus(ctx, obj)
+		clusterStatus, _ = r.getPgClusterStatus(ctx, obj)
 	} else {
 		clusterStatus = getUnstructuredObjStatus(obj)
 	}
-
+	addObjCondition(obj, resource)
 	resource.Status.Status = clusterStatus
 	err = r.Client.Status().Update(ctx, resource)
 	if err != nil {
@@ -334,6 +342,13 @@ func getUnstructuredObjStatus(obj *unstructured.Unstructured) string {
 	return clusterStatus
 }
 
+func addObjCondition(obj *unstructured.Unstructured, resource *v1alpha1.Manifest) {
+	apiRes, ok := obj.Object["Condition"].(map[string]v1alpha1.ApiResult)
+	if ok {
+		resource.Status.Condition = apiRes
+	}
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *ManifestReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	if r.Client == nil {
@@ -346,4 +361,15 @@ func (r *ManifestReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.Manifest{}).
 		Complete(r)
+}
+
+func validateResourceName(resource *v1alpha1.Manifest) error {
+	if resource.Spec.Kind == v1alpha1.DBTypeMysql {
+		if len(resource.Name) >= 32 {
+			return errors.NewBadRequest("The name length can't more than 32 characters")
+		}
+	} else if resource.Spec.Kind == v1alpha1.DBTypePostgreSQL {
+		return errors.NewBadRequest("The name length can't more than 32 characters")
+	}
+	return nil
 }

@@ -39,11 +39,19 @@ type ManifestSpec struct {
 
 // ManifestStatus defines the observed state of Manifest
 type ManifestStatus struct {
-	Status    string              `json:"status,omitempty"`
-	Condition []map[string]string `json:"condition,omitempty"`
+	Status    string               `json:"status,omitempty"`
+	Condition map[string]ApiResult `json:"condition,omitempty"`
 	// current manifest version
 	Version    int         `json:"version,omitempty"`
 	LastUpdate metav1.Time `json:"lastUpdate,omitempty"`
+}
+
+// ApiResult defines the result of pg operator ApiServer
+type ApiResult struct {
+	Api  string `json:"api,omitempty"`
+	Code string `json:"code,omitempty"`
+	Msg  string `json:"msg,omitempty"`
+	Data string `json:"data,omitempty"`
 }
 
 //+genclient

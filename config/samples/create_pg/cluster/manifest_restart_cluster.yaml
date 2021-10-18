@@ -13,10 +13,7 @@ spec:
     metadata:
       name: postgresqlcluster-sample
     spec:
-      # restart cluster
-      action: "scaledown_cluster"
       clientVersion: "4.7.1"
       namespace: "pgtest"
       name: "test001"
-      rollingUpdate: true
-      targets: []
+      restart: true

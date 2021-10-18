@@ -1,0 +1,89 @@
+apiVersion: pgcluster.kubesphere.io/v1alpha1
+kind: PostgreSQLCluster
+metadata:
+  name: postgresqlcluster-sample
+spec:
+  clientVersion: "4.7.1"
+  name: "test001"
+  namespace: "pgtest"
+  syncReplication: true
+  ccpImage: ""
+  ccpImageTag: ""
+  replicaCount: 1
+  cpuLimit: "1"
+  cpuRequest: "1"
+  memoryLimit: "1Gi"
+  memoryRequest: "1Gi"
+  database: "db1"
+  username: "pguser1"
+  password: "pass1"
+  # restart
+  podAnnotation:
+    - podName: "test001-kmfy"
+  # delete cluster
+
+  # scale up
+  storageConfig: ""
+
+  # scale down
+  replicaNames: "test001-kmfy"
+  # create user
+  managedUser: true
+  users:
+    - username: "pgtest"
+      password: "PassWord@"
+  # delete user
+
+  # show user
+  showSystemAccounts: true
+  # update user
+  setSystemAccountPassword: false
+
+  # pg params configmap
+  postgresqlParams: |
+    parameters:
+      jit: false
+      unix_socket_directories: /tmp
+      wal_level: logical
+      archive_mode: true
+      archive_command: source /opt/radondb/bin/postgres-ha/pgbackrest/pgbackrest-set-env.sh
+        && pgbackrest archive-push "%p"
+      archive_timeout: 60
+      log_directory: pg_log
+      #共享内存缓冲区量
+      shared_buffers: 128MB
+      #设置每个数据库会话使用的临时缓冲区的最大数目。
+      temp_buffers: 8MB
+      log_statement: none
+      #内部排序操作和哈希表使用的内存量
+      work_mem: 4MB
+      #流复制最大客户端数
+      max_wal_senders: 6
+      #记录每一个这种完成的语句的持续时间(毫秒)
+      log_min_duration_statement: 1000
+      # 最大并发连接数
+      max_connections: 100
+      #设置规划器对一个单一查询可用的有效磁盘缓冲区尺寸。
+      effective_cache_size: 4GB
+      #自动 WAL 检查点之间的最长时间。
+      checkpoint_timeout: 5min
+      #清理进程休眠的代价(范围: 0 - 10000)
+      vacuum_cost_limit: 200
+      #指定后台写入器活动轮次之间的延迟。 (范围: 10 - 10000)
+      bgwriter_delay: 200
+      #指定 WAL 写入器的活动轮次之间的延迟。 (范围: 1 - 10000)
+      wal_writer_delay: 200
+      #全页写开关
+      full_page_writes: on
+      # 死锁等待时间以毫秒计。 (范围: 0 - 1000)
+      deadlock_timeout: 1
+      #控制当一个会话为获得一个锁等到超过deadlock_timeout时，是否要产生一个日志消息。
+      log_lock_waits: on
+      #暂不开放
+      shared_preload_libraries: pgaudit.so,pg_stat_statements.so,pgnodemx.so
+    use_slots: false
+    recovery_conf:
+      restore_command: source /opt/radondb/bin/postgres-ha/pgbackrest/pgbackrest-set-env.sh
+        && pgbackrest archive-get %f "%p"
+    use_pg_rewind: true
+
