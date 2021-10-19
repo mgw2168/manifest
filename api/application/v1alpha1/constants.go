@@ -8,12 +8,12 @@ const (
 	AlreadyExists = "AlreadyExists"
 
 	// kind of operator cr
-	DBTypeMysql      = "MySQL"
+	DBTypeMysql = "MySQL"
 
 	// kind of cluster
 	KindPostgreSQLCluster = "PostgreSQLCluster"
-	KindPgCluster = "Pgcluster"
-	KindPgClusterVersion = "Pgcluster"
+	KindPgCluster         = "Pgcluster"
+	KindPgClusterVersion  = "radondb.com/v1"
 
 	// cluster status
 	ClusterStatusUnknown = "unknown"

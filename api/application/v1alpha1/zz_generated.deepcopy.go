@@ -118,10 +118,8 @@ func (in *ManifestStatus) DeepCopyInto(out *ManifestStatus) {
 	*out = *in
 	if in.Condition != nil {
 		in, out := &in.Condition, &out.Condition
-		*out = make(map[string]ApiResult, len(*in))
-		for key, val := range *in {
-			(*out)[key] = val
-		}
+		*out = make([]ApiResult, len(*in))
+		copy(*out, *in)
 	}
 	in.LastUpdate.DeepCopyInto(&out.LastUpdate)
 }

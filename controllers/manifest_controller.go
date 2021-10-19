@@ -74,7 +74,7 @@ func (r *ManifestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 
 	if err := validateResourceName(customResource); err != nil {
-		return ctrl.Result{}, nil
+		return ctrl.Result{Requeue: false}, err
 	}
 
 	if customResource.Status.Status == "" {
@@ -334,7 +334,7 @@ func getUnstructuredObjStatus(obj *unstructured.Unstructured) string {
 }
 
 func addObjCondition(obj *unstructured.Unstructured, resource *v1alpha1.Manifest) {
-	apiRes, ok := obj.Object["condition"].(map[string]v1alpha1.ApiResult)
+	apiRes, ok := obj.Object["condition"].([]v1alpha1.ApiResult)
 	if ok {
 		resource.Status.Condition = apiRes
 	}
@@ -356,11 +356,13 @@ func (r *ManifestReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 func validateResourceName(resource *v1alpha1.Manifest) error {
 	if resource.Spec.Kind == v1alpha1.DBTypeMysql {
-		if len(resource.Name) >= 32 {
+		if len(resource.Name) > 32 {
 			return errors.NewBadRequest("The name length can't more than 32 characters")
 		}
 	} else {
-		return errors.NewBadRequest("The name length can't more than 32 characters")
+		if len(resource.Name) < 15 {
+			return errors.NewBadRequest("The name length can't more than 15 characters")
+		}
 	}
 	return nil
 }

@@ -79,7 +79,7 @@ spec:
             description: ManifestStatus defines the observed state of Manifest
             properties:
               condition:
-                additionalProperties:
+                items:
                   description: ApiResult defines the result of pg operator ApiServer
                   properties:
                     api:
@@ -91,7 +91,7 @@ spec:
                     msg:
                       type: string
                   type: object
-                type: object
+                type: array
               lastUpdate:
                 format: date-time
                 type: string
