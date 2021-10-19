@@ -2,24 +2,18 @@ package v1alpha1
 
 const (
 	// custom resource status
-	Creating = "Creating"
-	Deleting = "Deleting"
-	Failed   = "Failed"
-	Error    = "Error"
-	AlreadyExists    = "AlreadyExists"
-	Created  = "Created"
-
-	NamespaceLabelKey = "kubesphere.io/namespace"
+	Creating      = "Creating"
+	Failed        = "Failed"
+	Error         = "Error"
+	AlreadyExists = "AlreadyExists"
 
 	// kind of operator cr
-	DBTypeClickHouse = "ClickHouseInstallation"
-	DBTypePostgreSQL = "PostgreSQL"
 	DBTypeMysql      = "MySQL"
 
-	// type of the cluster application
-	ClusterAppTypeClickHouse = "ClickHouse"
-	ClusterAPPTypePostgreSQL = "PostgreSQL"
-	ClusterAPPTypeMySQL      = "MySQL"
+	// kind of cluster
+	KindPostgreSQLCluster = "PostgreSQLCluster"
+	KindPgCluster = "Pgcluster"
+	KindPgClusterVersion = "Pgcluster"
 
 	// cluster status
 	ClusterStatusUnknown = "unknown"

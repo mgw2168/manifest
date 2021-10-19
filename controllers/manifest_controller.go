@@ -113,25 +113,24 @@ func (r *ManifestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			return ctrl.Result{Requeue: true}, err
 		}
 	} else if customResource.Status.Version != customResource.Spec.Version {
-		if err := r.patchCluster(ctx, customResource); err != nil {
+		if err := r.updateCluster(ctx, customResource); err != nil {
 			return ctrl.Result{}, err
 		}
 	} else {
 		// check custom resources status
 		return r.checkResourceStatus(ctx, customResource)
 	}
-	klog.V(1).Info("resource name: ", customResource.Name, ", state: ", customResource.Status.Status)
 	return ctrl.Result{}, nil
 }
 
-func (r *ManifestReconciler) patchCluster(ctx context.Context, resource *v1alpha1.Manifest) error {
+func (r *ManifestReconciler) updateCluster(ctx context.Context, resource *v1alpha1.Manifest) error {
 	obj, err := getUnstructuredObj(resource)
 	if err != nil {
 		return err
 	}
-	err = r.Client.Update(ctx, obj)
+	err = r.Client.Patch(ctx, obj, client.Merge)
 	if err != nil {
-		klog.V(1).Info(err.Error())
+		klog.Errorf("update cluster error: %s", err)
 		return client.IgnoreNotFound(err)
 	}
 
@@ -146,8 +145,6 @@ func (r *ManifestReconciler) patchCluster(ctx context.Context, resource *v1alpha
 }
 
 func (r *ManifestReconciler) deleteCluster(ctx context.Context, resource *v1alpha1.Manifest) error {
-	klog.V(1).Infof("do delete cluster: %s, %s, %s", resource.Namespace, resource.Name, resource.Spec.Kind)
-
 	obj, err := getUnstructuredObj(resource)
 	if err != nil {
 		klog.Errorf("get unstructured object error: %s", err.Error())
@@ -155,11 +152,11 @@ func (r *ManifestReconciler) deleteCluster(ctx context.Context, resource *v1alph
 	}
 
 	resourceKind := obj.GetKind()
-	if resourceKind == "PostgreSQLCluster" {
+	if resourceKind == v1alpha1.KindPostgreSQLCluster {
 		// delete pg cluster
 		pgCluster := obj.DeepCopy()
-		pgCluster.SetKind("Pgcluster")
-		pgCluster.SetAPIVersion("radondb.com/v1")
+		pgCluster.SetKind(v1alpha1.KindPgCluster)
+		pgCluster.SetAPIVersion(v1alpha1.KindPgClusterVersion)
 		err = r.Delete(ctx, pgCluster)
 		if err != nil {
 			klog.Errorf("delete pgcluster resource error: %s", err.Error())
@@ -188,14 +185,14 @@ func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alp
 
 	err = r.Create(ctx, obj)
 	if err != nil {
-		klog.Errorf("create cluster error: %s", err)
+		klog.Errorf("create cluster error: %s, %s, %s", err, obj.GetNamespace(), obj.GetName())
 		if errors.IsAlreadyExists(err) {
 			resource.Status.Status = v1alpha1.AlreadyExists
 		} else {
 			resource.Status.Status = v1alpha1.Error
 		}
-		//err = r.Status().Update(ctx, resource)
-		//return err
+		err = r.Status().Update(ctx, resource)
+		return err
 	}
 
 	// mysql 的话创建secret，保存密码
@@ -231,16 +228,7 @@ func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alp
 
 	resource.Status.Status = clusterStatus
 	resource.Status.Version = resource.Spec.Version
-	switch resource.Kind {
-	case v1alpha1.DBTypeClickHouse:
-		resource.Spec.AppName = v1alpha1.ClusterAppTypeClickHouse
-	case v1alpha1.DBTypePostgreSQL:
-		resource.Spec.AppName = v1alpha1.ClusterAPPTypePostgreSQL
-	case v1alpha1.DBTypeMysql:
-		resource.Spec.AppName = v1alpha1.ClusterAPPTypeMySQL
-	default:
-		resource.Spec.AppName = ""
-	}
+
 	err = r.Client.Status().Update(ctx, resource)
 	if err != nil {
 		resource.Status.Status = v1alpha1.Failed
@@ -309,8 +297,11 @@ func (r *ManifestReconciler) getPgClusterStatus(ctx context.Context, obj *unstru
 		Name:      obj.GetName(),
 	}, obj)
 	if err != nil {
-		klog.Errorf("get Pgcluster resource error: %s", err.Error())
-		return "", client.IgnoreNotFound(err)
+		klog.Errorf("get Pgcluster resource error: %s, %s, %s", err, obj.GetNamespace(), obj.GetName())
+		if errors.IsNotFound(err) {
+			_ = r.Delete(ctx, obj)
+		}
+		return v1alpha1.Error, client.IgnoreNotFound(err)
 	}
 	pgClusterStatus = getUnstructuredObjStatus(obj)
 	return pgClusterStatus, nil
@@ -343,7 +334,7 @@ func getUnstructuredObjStatus(obj *unstructured.Unstructured) string {
 }
 
 func addObjCondition(obj *unstructured.Unstructured, resource *v1alpha1.Manifest) {
-	apiRes, ok := obj.Object["Condition"].(map[string]v1alpha1.ApiResult)
+	apiRes, ok := obj.Object["condition"].(map[string]v1alpha1.ApiResult)
 	if ok {
 		resource.Status.Condition = apiRes
 	}
@@ -368,7 +359,7 @@ func validateResourceName(resource *v1alpha1.Manifest) error {
 		if len(resource.Name) >= 32 {
 			return errors.NewBadRequest("The name length can't more than 32 characters")
 		}
-	} else if resource.Spec.Kind == v1alpha1.DBTypePostgreSQL {
+	} else {
 		return errors.NewBadRequest("The name length can't more than 32 characters")
 	}
 	return nil
