@@ -25,6 +25,8 @@ import (
 
 // ManifestSpec defines the desired state of Manifest
 type ManifestSpec struct {
+	// cluster name
+	Cluster string `json:"cluster,omitempty"`
 	// kind of the database cluster
 	Kind string `json:"kind"`
 	// info from frontend

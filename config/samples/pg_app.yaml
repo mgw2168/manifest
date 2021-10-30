@@ -5,13 +5,24 @@ metadata:
 spec:
   # Add fields here
   name: "PostgreSQL"
-  description: "PostgreSQL 是备受业界青睐的关系型数据库，尤其是在地理空间和移动领域，具有自动备份、在线扩容以及监控告警等各种管理功能。"
-  description_en: "PostgreSQL is hot relational database for the industry,,,,"
+  description: "一款基于 PostgreSQL 的容器化、开源关系型数据库。"
+  description_en: "A cloud-native, powerful, open source object-relational database system based on PostgreSQL."
   abstraction: |
-    - 支持自动 Failover，提供HA功能；
-    - 提供PostgreSQL大部分常用参数修改接口，方便调整参数；
-    - 支持 PostGIS插件，为 PostgreSQL 提供了存储、查询和修改空间关系的能力；
-    - 提供实时监控、健康检查、日志自动清理等功能；
+    - 被广泛应用于地理空间和移动领域
+    - 具备高可用、稳定性、数据完整性等性能
+    - 支持在线水平扩展
+    - 支持故障自动转移 ，提供 HA 功能
+    - 提供 PostgreSQL 常用参数接口，方便调整参数
+    - 提供 PostGIS 插件，具备存储、查询和修改空间关系的能力
+    - 提供实时监控、健康检查、日志自动清理等功能
+  abstraction_en: |
+    - It is  widely used in geospatial and mobile fileds.
+    - Provide  features such as high availability, data stability and integrity .
+    - Support online horizontal scaling.
+    - Support auto-failover and HA.
+    - Provide PostgreSQL common APIs to facilitate parameter adjustment.
+    - Provide PostGIS plug-in to store, query and modify spatial relationships.
+    - Provide functions such as real-time monitoring, health check and automatic log clearing.
   operator: "admin"
   icon: "https://raw.githubusercontent.com/radondb/radondb-mysql-kubernetes/main/docs/images/logo_radondb-mysql.png"
   owner: "RadonDB"

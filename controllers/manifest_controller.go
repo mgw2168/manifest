@@ -73,10 +73,6 @@ func (r *ManifestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	if err := validateResourceName(customResource); err != nil {
-		return ctrl.Result{Requeue: false}, err
-	}
-
 	if customResource.Status.Status == "" {
 		customResource.Status.Status = v1alpha1.Creating
 		customResource.Status.LastUpdate = metav1.Now()
@@ -161,7 +157,7 @@ func (r *ManifestReconciler) deleteCluster(ctx context.Context, resource *v1alph
 		if err != nil {
 			klog.Errorf("delete pgcluster resource error: %s", err.Error())
 		}
-	} else if resourceKind == "Cluster" {
+	} else if resourceKind == v1alpha1.KindMysqlCluster {
 		// delete secret
 		err := r.createOrDeleteMysqlClusterPasswordSecret(ctx, resource, true)
 		if err != nil {
@@ -198,7 +194,7 @@ func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alp
 	// mysql 的话创建secret，保存密码
 	var clusterStatus string
 	resourceKind := obj.GetKind()
-	if resourceKind == "Cluster" {
+	if resourceKind == v1alpha1.KindMysqlCluster {
 		err := r.createOrDeleteMysqlClusterPasswordSecret(ctx, resource, false)
 		if err != nil {
 			klog.Errorf("create secret error: %s", err)
@@ -219,7 +215,9 @@ func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alp
 		return client.IgnoreNotFound(err)
 	}
 
-	if resourceKind == "PostgreSQLCluster" {
+	if resourceKind == v1alpha1.KindPostgreSQLCluster {
+		// todo get postgres user secret
+
 		clusterStatus, _ = r.getPgClusterStatus(ctx, obj)
 	} else {
 		clusterStatus = getUnstructuredObjStatus(obj)
@@ -230,11 +228,7 @@ func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alp
 	resource.Status.Version = resource.Spec.Version
 
 	err = r.Client.Status().Update(ctx, resource)
-	if err != nil {
-		resource.Status.Status = v1alpha1.Failed
-		err = r.Status().Update(ctx, resource)
-	}
-	return nil
+	return err
 }
 
 func (r *ManifestReconciler) createOrDeleteMysqlClusterPasswordSecret(ctx context.Context, resource *v1alpha1.Manifest, delete bool) (err error) {
@@ -273,7 +267,7 @@ func (r *ManifestReconciler) checkResourceStatus(ctx context.Context, resource *
 
 	var clusterStatus string
 	resourceKind := obj.GetKind()
-	if resourceKind == "PostgreSQLCluster" {
+	if resourceKind == v1alpha1.KindPostgreSQLCluster {
 		clusterStatus, _ = r.getPgClusterStatus(ctx, obj)
 	} else {
 		clusterStatus = getUnstructuredObjStatus(obj)
@@ -290,8 +284,8 @@ func (r *ManifestReconciler) checkResourceStatus(ctx context.Context, resource *
 
 func (r *ManifestReconciler) getPgClusterStatus(ctx context.Context, obj *unstructured.Unstructured) (string, error) {
 	var pgClusterStatus string
-	obj.SetKind("Pgcluster")
-	obj.SetAPIVersion("radondb.com/v1")
+	obj.SetKind(v1alpha1.KindPgCluster)
+	obj.SetAPIVersion(v1alpha1.KindPgClusterVersion)
 	err := r.Get(ctx, types.NamespacedName{
 		Namespace: obj.GetNamespace(),
 		Name:      obj.GetName(),
@@ -306,6 +300,7 @@ func (r *ManifestReconciler) getPgClusterStatus(ctx context.Context, obj *unstru
 	pgClusterStatus = getUnstructuredObjStatus(obj)
 	return pgClusterStatus, nil
 }
+
 func getUnstructuredObj(resource *v1alpha1.Manifest) (obj *unstructured.Unstructured, err error) {
 	obj = &unstructured.Unstructured{}
 	_, _, err = decUnstructured.Decode([]byte(resource.Spec.CustomResource), nil, obj)
@@ -322,15 +317,13 @@ func getUnstructuredObjStatus(obj *unstructured.Unstructured) string {
 	statusMap, ok := obj.Object["status"].(map[string]interface{})
 	if ok {
 		clusterStatus, ok = statusMap["state"].(string)
-		if ok {
-			return clusterStatus
-		} else {
-			clusterStatus = v1alpha1.ClusterStatusUnknown
+		if !ok {
+			return v1alpha1.ClusterStatusUnknown
 		}
 	} else {
-		clusterStatus = v1alpha1.ClusterStatusUnknown
+		return v1alpha1.ClusterStatusUnknown
 	}
-	return clusterStatus
+	return convertObjState(clusterStatus)
 }
 
 func addObjCondition(obj *unstructured.Unstructured, resource *v1alpha1.Manifest) {
@@ -360,7 +353,7 @@ func validateResourceName(resource *v1alpha1.Manifest) error {
 			return errors.NewBadRequest("The name length can't more than 32 characters")
 		}
 	} else {
-		if len(resource.Name) < 15 {
+		if len(resource.Name) > 15 {
 			return errors.NewBadRequest("The name length can't more than 15 characters")
 		}
 	}

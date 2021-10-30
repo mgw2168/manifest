@@ -5,12 +5,24 @@ metadata:
 spec:
   # Add fields here
   name: "ClickHouse"
-  description: "是一个分布式实时分析型列式存储数据库。具备高性能，支撑PB级数据，提供实时分析，稳定可扩展等特性。适用于数据仓库、BI报表、监控系统、互联网用户行为分析、广告投放业务以及工业、物联网等分析和时序应用场景。"
+  description: "一款基于 ClickHouse 分布式实时分析型列式存储数据库。"
+  description_en: "A cloud-native, distributed, real-time analytical, column-storage database system based on ClickHouse."
   abstraction: |
-    - 支持横向增加节点、集群节点升降配置等弹性功能；
-    - 提供集群内数据重分布等高级集群管理功能；
-    - 您可以像单节点一样使用、管理整个集群。
-    - 集群支持千亿条结构化数据毫秒级查询，查询结果支持自定义图形化展现。
+    - 具备高可用、PB 级数据存储、实时数据分析、架构稳定和可扩展等性能
+    - 自动化部署集群
+    - 自动化生成/更新集群配置
+    - 自动化水平扩展
+    - 自动化版本升级
+    - 灵活的模版选择
+    - 自定义监控
+  abstraction_en: |
+    - Provide  features such as high availability, PB storage, real-time analytical, architectural stability  and scalability.
+    - Automatic cluster deployment
+    - Automatically generate/update cluster configuration
+    - Horizontal scaling
+    - Automatic version upgrade
+    - Flexible template selection
+    - Custom monitoring management
   operator: "admin"
   icon: "https://raw.githubusercontent.com/radondb/radondb-mysql-kubernetes/main/docs/images/logo_radondb-mysql.png"
   owner: "RadonDB"

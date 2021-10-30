@@ -56,6 +56,9 @@ spec:
                 type: string
               appVersion:
                 type: string
+              cluster:
+                description: cluster name
+                type: string
               customResource:
                 type: string
               description:
