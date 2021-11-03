@@ -89,3 +89,14 @@ type ManifestList struct {
 func init() {
 	SchemeBuilder.Register(&Manifest{}, &ManifestList{})
 }
+
+func (in *Manifest) GetManifestCluster() string {
+	return getValue(in.Labels, ClusterNameLabelKey)
+}
+
+func getValue(m map[string]string, key string) string {
+	if m == nil {
+		return ""
+	}
+	return m[key]
+}

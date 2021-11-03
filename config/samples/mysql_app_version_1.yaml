@@ -13,6 +13,9 @@ spec:
   changeLog: |
     - logloglog
     - log log log
+  changeLog_en: |
+    - English log mysql
+    - English log mysql
   operatorVersion: "2.8.0"
   appVersion: "8.0"
   owner: "RadonDB"

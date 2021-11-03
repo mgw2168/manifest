@@ -10,9 +10,14 @@ spec:
     - https://github.com/radondb/radondb-clickhouse-kubernetes/raw/main/document/_images/logo_radondb.svg
     - https://github.com/radondb/radondb-clickhouse-kubernetes/raw/main/document/_images/logo_radondb.svg
     - https://github.com/radondb/radondb-clickhouse-kubernetes/raw/main/document/_images/logo_radondb.svg
+  screenshots_en: |
+    - https://github.com/radondb/radondb-clickhouse-kubernetes/raw/main/document/_images/logo_radondb.svg
   changeLog: |
     - Distributed引擎支持currentDatabase函数
     - 增强备份恢复功能"
+  changeLog_en: |
+    - English log clickhosue
+    - English log clickhosue
   operatorVersion: "1.0.1"
   appVersion: "20.1"
   owner: "RadonDB"
