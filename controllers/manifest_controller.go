@@ -18,6 +18,8 @@ package controllers
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -74,7 +76,7 @@ func (r *ManifestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 
 	if customResource.Status.Status == "" {
-		customResource.Status.Status = v1alpha1.Creating
+		customResource.Status.Status = v1alpha1.ManifestCreating
 		customResource.Status.LastUpdate = metav1.Now()
 		err := r.Status().Update(ctx, customResource)
 		return reconcile.Result{}, err
@@ -104,9 +106,9 @@ func (r *ManifestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			return reconcile.Result{}, err
 		}
 	}
-	if customResource.Status.Status == v1alpha1.Creating {
+	if customResource.Status.Status == v1alpha1.ManifestCreating {
 		if err := r.installCluster(ctx, customResource); err != nil {
-			return ctrl.Result{Requeue: true}, err
+			return ctrl.Result{}, err
 		}
 	} else if customResource.Status.Version != customResource.Spec.Version {
 		if err := r.updateCluster(ctx, customResource); err != nil {
@@ -158,7 +160,7 @@ func (r *ManifestReconciler) deleteCluster(ctx context.Context, resource *v1alph
 			klog.Errorf("delete pgcluster resource error: %s", err.Error())
 		}
 	} else if resourceKind == v1alpha1.KindMysqlCluster {
-		// delete secret
+		// delete secret of mysql user
 		err := r.createOrDeleteMysqlClusterPasswordSecret(ctx, resource, true)
 		if err != nil {
 			klog.Errorf("delete mysql password secret error: %s", err)
@@ -182,11 +184,7 @@ func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alp
 	err = r.Create(ctx, obj)
 	if err != nil {
 		klog.Errorf("create cluster error: %s, %s, %s", err, obj.GetNamespace(), obj.GetName())
-		if errors.IsAlreadyExists(err) {
-			resource.Status.Status = v1alpha1.AlreadyExists
-		} else {
-			resource.Status.Status = v1alpha1.Error
-		}
+		resource.Status.Status = v1alpha1.Error
 		err = r.Status().Update(ctx, resource)
 		return err
 	}
@@ -217,12 +215,11 @@ func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alp
 
 	if resourceKind == v1alpha1.KindPostgreSQLCluster {
 		// todo get postgres user secret
-
+		r.getPostgresPassword(resource, obj)
 		clusterStatus, _ = r.getPgClusterStatus(ctx, obj)
 	} else {
 		clusterStatus = getUnstructuredObjStatus(obj)
 	}
-	addObjCondition(obj, resource)
 
 	resource.Status.Status = clusterStatus
 	resource.Status.Version = resource.Spec.Version
@@ -254,7 +251,7 @@ func (r *ManifestReconciler) checkResourceStatus(ctx context.Context, resource *
 	klog.V(1).Infof("do check status: %s, %s, %s", resource.Namespace, resource.Name, resource.Spec.Kind)
 	obj, err := getUnstructuredObj(resource)
 	if err != nil {
-		return ctrl.Result{RequeueAfter: CheckTime}, err
+		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
 	err = r.Get(ctx, types.NamespacedName{
@@ -262,7 +259,7 @@ func (r *ManifestReconciler) checkResourceStatus(ctx context.Context, resource *
 		Name:      resource.Name}, obj)
 	if err != nil {
 		klog.V(1).Info(err.Error())
-		return ctrl.Result{RequeueAfter: CheckTime}, err
+		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
 	var clusterStatus string
@@ -272,7 +269,7 @@ func (r *ManifestReconciler) checkResourceStatus(ctx context.Context, resource *
 	} else {
 		clusterStatus = getUnstructuredObjStatus(obj)
 	}
-	addObjCondition(obj, resource)
+	//addObjCondition(obj, resource)
 	resource.Status.Status = clusterStatus
 	err = r.Client.Status().Update(ctx, resource)
 	if err != nil {
@@ -283,7 +280,6 @@ func (r *ManifestReconciler) checkResourceStatus(ctx context.Context, resource *
 }
 
 func (r *ManifestReconciler) getPgClusterStatus(ctx context.Context, obj *unstructured.Unstructured) (string, error) {
-	var pgClusterStatus string
 	obj.SetKind(v1alpha1.KindPgCluster)
 	obj.SetAPIVersion(v1alpha1.KindPgClusterVersion)
 	err := r.Get(ctx, types.NamespacedName{
@@ -297,8 +293,7 @@ func (r *ManifestReconciler) getPgClusterStatus(ctx context.Context, obj *unstru
 		}
 		return v1alpha1.Error, client.IgnoreNotFound(err)
 	}
-	pgClusterStatus = getUnstructuredObjStatus(obj)
-	return pgClusterStatus, nil
+	return getUnstructuredObjStatus(obj), nil
 }
 
 func getUnstructuredObj(resource *v1alpha1.Manifest) (obj *unstructured.Unstructured, err error) {
@@ -313,14 +308,13 @@ func getUnstructuredObj(resource *v1alpha1.Manifest) (obj *unstructured.Unstruct
 }
 
 func getUnstructuredObjStatus(obj *unstructured.Unstructured) string {
-	var clusterStatus string
 	statusMap, ok := obj.Object["status"].(map[string]interface{})
-	if ok {
-		clusterStatus, ok = statusMap["state"].(string)
-		if !ok {
-			return v1alpha1.ClusterStatusUnknown
-		}
-	} else {
+	if !ok {
+		return v1alpha1.ClusterStatusUnknown
+	}
+
+	clusterStatus, ok := statusMap["state"].(string)
+	if !ok {
 		return v1alpha1.ClusterStatusUnknown
 	}
 	return convertObjState(clusterStatus)
@@ -345,6 +339,52 @@ func (r *ManifestReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.Manifest{}).
 		Complete(r)
+}
+
+func (r *ManifestReconciler) getPostgresPassword(manifest *v1alpha1.Manifest, obj *unstructured.Unstructured) error {
+	secret := &corev1.Secret{
+		TypeMeta:   metav1.TypeMeta{Kind: "Secret", APIVersion: "v1"},
+		ObjectMeta: metav1.ObjectMeta{Name: manifest.Name + "-postgres-secret", Namespace: manifest.Namespace},
+	}
+	if err := r.Client.Get(context.TODO(), types.NamespacedName{
+		Namespace: manifest.Namespace,
+		Name:      manifest.Name + "-postgres-secret",
+	}, secret); err != nil {
+		klog.Errorf("get postgres user's password error: %s", err)
+	}
+
+	postgresUsername := secret.Data["username"]
+	postgresPassword := secret.Data["password"]
+	pwd, err := base64.StdEncoding.DecodeString(base64.StdEncoding.EncodeToString(postgresPassword))
+	if err != nil {
+		klog.Errorf("decode base64 string error: %s", err)
+	}
+
+	postgres := make(map[string]string)
+	postgres["username"] = string(postgresUsername)
+	postgres["password"] = string(pwd)
+
+	spec, ok := obj.Object["spec"]
+	if ok {
+		specMap, ok := spec.(map[string]interface{})
+		if ok {
+			specMap["users"] = []map[string]string{postgres}
+		}
+	}
+	err = r.Client.Patch(context.TODO(), obj, client.Merge)
+	if err != nil {
+		klog.Errorf("patch postgresqlcluster resource error: %s", err)
+	}
+	objBytes, err := json.Marshal(obj)
+	if err != nil {
+		klog.Errorf("unmarshal unstructured obj error: %s", err)
+	}
+	manifest.Spec.CustomResource = string(objBytes)
+	err = r.Client.Patch(context.TODO(), manifest, client.Merge)
+	if err != nil {
+		klog.Errorf("patch manifest resource error: %s", err)
+	}
+	return err
 }
 
 func validateResourceName(resource *v1alpha1.Manifest) error {

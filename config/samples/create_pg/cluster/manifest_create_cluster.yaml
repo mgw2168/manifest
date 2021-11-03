@@ -1,8 +1,8 @@
 apiVersion: application.kubesphere.io/v1alpha1
 kind: Manifest
 metadata:
-  name: pg-cluster-xx0
-  namespace: pgtest
+  name: pg-test001
+  namespace: pg-test
 spec:
   kind: "PostgreSQL"
   appVersion: "12.0"
@@ -11,15 +11,16 @@ spec:
     apiVersion: pgcluster.kubesphere.io/v1alpha1
     kind: PostgreSQLCluster
     metadata:
-      name: pg-test-01
-      namespace: pgtest
+      name: pg-test001
+      namespace: pg-test
     spec:
       clientVersion: "4.7.1"
-      name: "test001"
-      namespace: "pgtest"
+      name: "pg-test001"
+      namespace: "pg-test"
       syncReplication: true
       ccpImage: ""
       ccpImageTag: ""
+      pgVersion: "12"
       replicaCount: 1
       cpuLimit: "500m"
       cpuRequest: "500m"
@@ -28,3 +29,6 @@ spec:
       database: "db1"
       username: "pguser1"
       password: "pass1"
+      rollingUpdate: true
+      restart: false
+      storageConfig: "csi-ssd-enterprise"

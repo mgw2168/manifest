@@ -4,9 +4,9 @@ import "github.com/manifest/api/application/v1alpha1"
 
 func convertObjState(state string) (frontState string) {
 	switch state {
-	case v1alpha1.ClusterInitState, v1alpha1.StatusCreating:
+	case v1alpha1.ClusterInitState, v1alpha1.StatusCreating, v1alpha1.PgclusterStateProcessed:
 		frontState = v1alpha1.FrontCreating
-	case v1alpha1.ClusterUpdateState, v1alpha1.StatusInProgress, v1alpha1.PgclusterStateProcessed:
+	case v1alpha1.ClusterUpdateState, v1alpha1.StatusInProgress:
 		frontState = v1alpha1.FrontUpdating
 	case v1alpha1.StatusCompleted, v1alpha1.PgclusterStateCreated:
 		frontState = v1alpha1.FrontCompleted

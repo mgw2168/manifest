@@ -5,23 +5,22 @@ type FrontState string
 
 const (
 	// custom resource status
-	Creating      = "Creating"
-	Failed        = "Failed"
-	Error         = "Error"
-	AlreadyExists = "AlreadyExists"
+	ManifestCreating = "ManifestCreating"
+	Failed           = "Failed"
+	Error            = "Error"
 
 	// front state
-	FrontCreating       string = "Creating"
-	FrontUpdating       string = "InProgress"
-	FrontCompleted      string = "Completed"
-	FrontRunning        string = "Running"
-	FrontClosed         string = "Closed"
-	FrontCreateFailed   string = "Create Failed"
-	FrontUpdateFailed   string = "Update Failed"
-	FrontTerminating    string = "Terminating"
-	StatusBootstrapping string = "Bootstrapping"
-	StatusBootstrapped  string = "Bootstrapped"
-	StatusRestoring     string = "Restoring"
+	FrontCreating       string = "Creating"      // 创建中
+	FrontUpdating       string = "InProgress"    // 更新中
+	FrontCompleted      string = "Completed"     // 创建完成
+	FrontRunning        string = "Running"       // 运行中
+	FrontClosed         string = "Closed"        // 已关机
+	FrontCreateFailed   string = "CreateFailed"  // 创建失败
+	FrontUpdateFailed   string = "UpdateFailed"  // 更新失败
+	FrontTerminating    string = "Terminating"   // 删除中
+	StatusBootstrapping string = "Bootstrapping" // 从已有的数据源启动集群中
+	StatusBootstrapped  string = "Bootstrapped"  // 从已有的数据源启动集群完成
+	StatusRestoring     string = "Restoring"     // 恢复中
 
 	// MySQL state
 	// ClusterInitState  indicates whether the cluster is initializing.
