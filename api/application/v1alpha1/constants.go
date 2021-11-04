@@ -6,6 +6,7 @@ type FrontState string
 const (
 
 	ClusterNameLabelKey               = "kubesphere.io/cluster"
+	NamespaceLabelKey                 = "kubesphere.io/namespace"
 
 	// custom resource status
 	ManifestCreating = "ManifestCreating"

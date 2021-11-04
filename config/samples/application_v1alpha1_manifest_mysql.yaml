@@ -4,7 +4,8 @@ metadata:
   name: manifest-mysql
   namespace: mysql-test
 spec:
-  kind: "MySQL"
+  cluster: "host"
+  kind: "MysqlCluster"
   appVersion: "5.7"
   version: 2
   customResource: |

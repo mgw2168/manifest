@@ -94,6 +94,11 @@ func (in *Manifest) GetManifestCluster() string {
 	return getValue(in.Labels, ClusterNameLabelKey)
 }
 
+func (in *Manifest) GetManifestNamespace() string {
+	return getValue(in.Labels, NamespaceLabelKey)
+}
+
+
 func getValue(m map[string]string, key string) string {
 	if m == nil {
 		return ""

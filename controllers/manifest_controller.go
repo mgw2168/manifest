@@ -214,8 +214,10 @@ func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alp
 	}
 
 	if resourceKind == v1alpha1.KindPostgreSQLCluster {
-		// todo get postgres user secret
-		r.getPostgresPassword(resource, obj)
+		err = r.getPostgresPassword(resource, obj)
+		if err != nil {
+			return err
+		}
 		clusterStatus, _ = r.getPgClusterStatus(ctx, obj)
 	} else {
 		clusterStatus = getUnstructuredObjStatus(obj)
@@ -269,7 +271,7 @@ func (r *ManifestReconciler) checkResourceStatus(ctx context.Context, resource *
 	} else {
 		clusterStatus = getUnstructuredObjStatus(obj)
 	}
-	//addObjCondition(obj, resource)
+
 	resource.Status.Status = clusterStatus
 	err = r.Client.Status().Update(ctx, resource)
 	if err != nil {
@@ -320,13 +322,6 @@ func getUnstructuredObjStatus(obj *unstructured.Unstructured) string {
 	return convertObjState(clusterStatus)
 }
 
-func addObjCondition(obj *unstructured.Unstructured, resource *v1alpha1.Manifest) {
-	apiRes, ok := obj.Object["condition"].([]v1alpha1.ApiResult)
-	if ok {
-		resource.Status.Condition = apiRes
-	}
-}
-
 // SetupWithManager sets up the controller with the Manager.
 func (r *ManifestReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	if r.Client == nil {
@@ -353,15 +348,13 @@ func (r *ManifestReconciler) getPostgresPassword(manifest *v1alpha1.Manifest, ob
 		klog.Errorf("get postgres user's password error: %s", err)
 	}
 
-	postgresUsername := secret.Data["username"]
-	postgresPassword := secret.Data["password"]
-	pwd, err := base64.StdEncoding.DecodeString(base64.StdEncoding.EncodeToString(postgresPassword))
+	pwd, err := base64.StdEncoding.DecodeString(base64.StdEncoding.EncodeToString(secret.Data["password"]))
 	if err != nil {
 		klog.Errorf("decode base64 string error: %s", err)
 	}
 
 	postgres := make(map[string]string)
-	postgres["username"] = string(postgresUsername)
+	postgres["username"] = string(secret.Data["username"])
 	postgres["password"] = string(pwd)
 
 	spec, ok := obj.Object["spec"]
@@ -385,17 +378,4 @@ func (r *ManifestReconciler) getPostgresPassword(manifest *v1alpha1.Manifest, ob
 		klog.Errorf("patch manifest resource error: %s", err)
 	}
 	return err
-}
-
-func validateResourceName(resource *v1alpha1.Manifest) error {
-	if resource.Spec.Kind == v1alpha1.DBTypeMysql {
-		if len(resource.Name) > 32 {
-			return errors.NewBadRequest("The name length can't more than 32 characters")
-		}
-	} else {
-		if len(resource.Name) > 15 {
-			return errors.NewBadRequest("The name length can't more than 15 characters")
-		}
-	}
-	return nil
 }
