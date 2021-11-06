@@ -4,12 +4,12 @@ package v1alpha1
 type FrontState string
 
 const (
-
-	ClusterNameLabelKey               = "kubesphere.io/cluster"
-	NamespaceLabelKey                 = "kubesphere.io/namespace"
+	ClusterNameLabelKey = "kubesphere.io/cluster"
+	NamespaceLabelKey   = "kubesphere.io/namespace"
 
 	// custom resource status
 	ManifestCreating = "ManifestCreating"
+	ManifestCreated  = "ManifestCreated"
 	Failed           = "Failed"
 	Error            = "Error"
 

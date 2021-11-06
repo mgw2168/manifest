@@ -41,8 +41,9 @@ type ManifestSpec struct {
 
 // ManifestStatus defines the observed state of Manifest
 type ManifestStatus struct {
-	Status    string      `json:"status,omitempty"`
-	Condition []ApiResult `json:"condition,omitempty"`
+	State         string      `json:"state,omitempty"`
+	ResourceState string      `json:"resourceState,omitempty"`
+	Condition     []ApiResult `json:"condition,omitempty"`
 	// current manifest version
 	Version    int         `json:"version,omitempty"`
 	LastUpdate metav1.Time `json:"lastUpdate,omitempty"`
@@ -59,13 +60,12 @@ type ApiResult struct {
 //+genclient
 //+kubebuilder:printcolumn:name="Kind",type="string",JSONPath=".spec.kind"
 //+kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status"
-//+kubebuilder:printcolumn:name="App",type="string",JSONPath=".spec.app"
 //+kubebuilder:printcolumn:name="AppVersion",type="string",JSONPath=".spec.appVersion"
 //+kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 //+genclient:nonNamespaced
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+//+k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // Manifest is the Schema for the manifests API
 type Manifest struct {
@@ -97,7 +97,6 @@ func (in *Manifest) GetManifestCluster() string {
 func (in *Manifest) GetManifestNamespace() string {
 	return getValue(in.Labels, NamespaceLabelKey)
 }
-
 
 func getValue(m map[string]string, key string) string {
 	if m == nil {

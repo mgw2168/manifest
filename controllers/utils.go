@@ -34,7 +34,6 @@ func convertObjState(state string) (frontState string) {
 	return
 }
 
-
 //func (r *ManifestReconciler) newClusterClient(clusterName string, scheme *runtime.Scheme) (client.Client, error) {
 //	var clusterCli client.Client
 //	clusterInfo, err := r.clusterClients.Get(clusterName)

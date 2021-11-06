@@ -69,14 +69,11 @@ func (r *ManifestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	customResource := &v1alpha1.Manifest{}
 	if err := r.Get(ctx, req.NamespacedName, customResource); err != nil {
-		if errors.IsAlreadyExists(err) {
-			return ctrl.Result{}, err
-		}
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	if customResource.Status.Status == "" {
-		customResource.Status.Status = v1alpha1.ManifestCreating
+	if customResource.Status.State == "" {
+		customResource.Status.State = v1alpha1.ManifestCreating
 		customResource.Status.LastUpdate = metav1.Now()
 		err := r.Status().Update(ctx, customResource)
 		return reconcile.Result{}, err
@@ -106,14 +103,12 @@ func (r *ManifestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			return reconcile.Result{}, err
 		}
 	}
-	if customResource.Status.Status == v1alpha1.ManifestCreating {
+	if customResource.Status.State == v1alpha1.ManifestCreating {
 		if err := r.installCluster(ctx, customResource); err != nil {
 			return ctrl.Result{}, err
 		}
 	} else if customResource.Status.Version != customResource.Spec.Version {
-		if err := r.updateCluster(ctx, customResource); err != nil {
-			return ctrl.Result{}, err
-		}
+		return r.updateCluster(ctx, customResource)
 	} else {
 		// check custom resources status
 		return r.checkResourceStatus(ctx, customResource)
@@ -121,25 +116,34 @@ func (r *ManifestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	return ctrl.Result{}, nil
 }
 
-func (r *ManifestReconciler) updateCluster(ctx context.Context, resource *v1alpha1.Manifest) error {
+func (r *ManifestReconciler) updateCluster(ctx context.Context, resource *v1alpha1.Manifest) (ctrl.Result, error) {
 	obj, err := getUnstructuredObj(resource)
 	if err != nil {
-		return err
+		return ctrl.Result{}, err
 	}
-	err = r.Client.Patch(ctx, obj, client.Merge)
+	oldObj := obj.DeepCopy()
+	err = r.Get(ctx, types.NamespacedName{
+		Namespace: obj.GetNamespace(),
+		Name:      obj.GetName(),
+	}, oldObj)
+	if err != nil {
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+	oldObj.Object["spec"] = obj.Object["spec"]
+	err = r.Patch(ctx, oldObj, client.Merge)
 	if err != nil {
 		klog.Errorf("update cluster error: %s", err)
-		return client.IgnoreNotFound(err)
+		return ctrl.Result{}, err
 	}
 
 	resource.Status.Version = resource.Spec.Version
-	err = r.Client.Status().Update(ctx, resource)
+	err = r.Status().Update(ctx, resource)
 	if err != nil {
-		resource.Status.Status = v1alpha1.Failed
+		resource.Status.ResourceState = v1alpha1.Failed
 		err = r.Status().Update(ctx, resource)
 	}
 
-	return nil
+	return ctrl.Result{}, nil
 }
 
 func (r *ManifestReconciler) deleteCluster(ctx context.Context, resource *v1alpha1.Manifest) error {
@@ -164,7 +168,7 @@ func (r *ManifestReconciler) deleteCluster(ctx context.Context, resource *v1alph
 		err := r.createOrDeleteMysqlClusterPasswordSecret(ctx, resource, true)
 		if err != nil {
 			klog.Errorf("delete mysql password secret error: %s", err)
-			resource.Status.Status = v1alpha1.Error
+			resource.Status.ResourceState = v1alpha1.Error
 			err = r.Status().Update(ctx, resource)
 			return err
 		}
@@ -175,59 +179,54 @@ func (r *ManifestReconciler) deleteCluster(ctx context.Context, resource *v1alph
 }
 
 func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alpha1.Manifest) error {
-	klog.V(1).Infof("install cluster: %s, %s, %s", resource.Namespace, resource.Name, resource.Spec.Kind)
+	klog.Infof("install cluster: %s, %s, %s", resource.Namespace, resource.Name, resource.Spec.Kind)
 	obj, err := getUnstructuredObj(resource)
 	if err != nil {
+		return err
+	}
+
+	err = r.Get(ctx, types.NamespacedName{
+		Namespace: obj.GetNamespace(),
+		Name:      obj.GetName(),
+	}, obj)
+	if !errors.IsNotFound(err) {
+		klog.Errorf("get obj error: %s", err)
 		return err
 	}
 
 	err = r.Create(ctx, obj)
 	if err != nil {
 		klog.Errorf("create cluster error: %s, %s, %s", err, obj.GetNamespace(), obj.GetName())
-		resource.Status.Status = v1alpha1.Error
+		resource.Status.ResourceState = v1alpha1.Error
 		err = r.Status().Update(ctx, resource)
 		return err
 	}
+	resource.Status.State = v1alpha1.ManifestCreated
+	resource.Status.ResourceState = v1alpha1.FrontCreating
+	resource.Status.Version = resource.Spec.Version
+	err = r.Status().Update(ctx, resource)
+	if err != nil {
+		klog.Errorf("update manifest status error: %s", err)
+		return err
+	}
 
-	// mysql 的话创建secret，保存密码
-	var clusterStatus string
+	// If it is a MySQL Cluster, create a secret to save password
 	resourceKind := obj.GetKind()
 	if resourceKind == v1alpha1.KindMysqlCluster {
-		err := r.createOrDeleteMysqlClusterPasswordSecret(ctx, resource, false)
+		err = r.createOrDeleteMysqlClusterPasswordSecret(ctx, resource, false)
 		if err != nil {
 			klog.Errorf("create secret error: %s", err)
-			resource.Status.Status = v1alpha1.Error
+			resource.Status.ResourceState = v1alpha1.Error
 			err = r.Status().Update(ctx, resource)
 			return err
 		}
-	}
-
-	time.Sleep(500 * time.Millisecond)
-
-	err = r.Get(ctx, types.NamespacedName{
-		Namespace: obj.GetNamespace(),
-		Name:      obj.GetName(),
-	}, obj)
-	if err != nil {
-		klog.Error(err, "get unstructured object error.")
-		return client.IgnoreNotFound(err)
-	}
-
-	if resourceKind == v1alpha1.KindPostgreSQLCluster {
+	} else if resourceKind == v1alpha1.KindPostgreSQLCluster {
 		err = r.getPostgresPassword(resource, obj)
 		if err != nil {
 			return err
 		}
-		clusterStatus, _ = r.getPgClusterStatus(ctx, obj)
-	} else {
-		clusterStatus = getUnstructuredObjStatus(obj)
 	}
-
-	resource.Status.Status = clusterStatus
-	resource.Status.Version = resource.Spec.Version
-
-	err = r.Client.Status().Update(ctx, resource)
-	return err
+	return nil
 }
 
 func (r *ManifestReconciler) createOrDeleteMysqlClusterPasswordSecret(ctx context.Context, resource *v1alpha1.Manifest, delete bool) (err error) {
@@ -242,9 +241,9 @@ func (r *ManifestReconciler) createOrDeleteMysqlClusterPasswordSecret(ctx contex
 		},
 	}
 	if delete {
-		err = r.Client.Delete(ctx, secret)
+		err = r.Delete(ctx, secret)
 	} else {
-		err = r.Client.Create(ctx, secret)
+		err = r.Create(ctx, secret)
 	}
 	return
 }
@@ -272,10 +271,10 @@ func (r *ManifestReconciler) checkResourceStatus(ctx context.Context, resource *
 		clusterStatus = getUnstructuredObjStatus(obj)
 	}
 
-	resource.Status.Status = clusterStatus
-	err = r.Client.Status().Update(ctx, resource)
+	resource.Status.ResourceState = clusterStatus
+	err = r.Status().Update(ctx, resource)
 	if err != nil {
-		resource.Status.Status = v1alpha1.Failed
+		resource.Status.ResourceState = v1alpha1.Failed
 		err = r.Status().Update(ctx, resource)
 	}
 	return ctrl.Result{RequeueAfter: CheckTime}, err
@@ -337,11 +336,12 @@ func (r *ManifestReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *ManifestReconciler) getPostgresPassword(manifest *v1alpha1.Manifest, obj *unstructured.Unstructured) error {
+	time.Sleep(500 * time.Millisecond)
 	secret := &corev1.Secret{
 		TypeMeta:   metav1.TypeMeta{Kind: "Secret", APIVersion: "v1"},
 		ObjectMeta: metav1.ObjectMeta{Name: manifest.Name + "-postgres-secret", Namespace: manifest.Namespace},
 	}
-	if err := r.Client.Get(context.TODO(), types.NamespacedName{
+	if err := r.Get(context.TODO(), types.NamespacedName{
 		Namespace: manifest.Namespace,
 		Name:      manifest.Name + "-postgres-secret",
 	}, secret); err != nil {
@@ -364,18 +364,37 @@ func (r *ManifestReconciler) getPostgresPassword(manifest *v1alpha1.Manifest, ob
 			specMap["users"] = []map[string]string{postgres}
 		}
 	}
-	err = r.Client.Patch(context.TODO(), obj, client.Merge)
+
+	err = r.Get(context.TODO(), types.NamespacedName{
+		Namespace: obj.GetNamespace(),
+		Name:      obj.GetName(),
+	}, obj)
+	if err != nil {
+		return client.IgnoreNotFound(err)
+	}
+	obj.Object["spec"] = spec
+	err = r.Patch(context.TODO(), obj, client.Merge)
 	if err != nil {
 		klog.Errorf("patch postgresqlcluster resource error: %s", err)
 	}
+
 	objBytes, err := json.Marshal(obj)
 	if err != nil {
 		klog.Errorf("unmarshal unstructured obj error: %s", err)
 	}
+
+	err = r.Get(context.TODO(), types.NamespacedName{
+		Namespace: obj.GetNamespace(),
+		Name:      obj.GetName(),
+	}, manifest)
+	if err != nil {
+		return client.IgnoreNotFound(err)
+	}
 	manifest.Spec.CustomResource = string(objBytes)
-	err = r.Client.Patch(context.TODO(), manifest, client.Merge)
+	err = r.Patch(context.TODO(), manifest, client.Merge)
 	if err != nil {
 		klog.Errorf("patch manifest resource error: %s", err)
 	}
+
 	return err
 }

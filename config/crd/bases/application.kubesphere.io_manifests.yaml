@@ -23,9 +23,6 @@ spec:
     - jsonPath: .status.status
       name: Status
       type: string
-    - jsonPath: .spec.app
-      name: App
-      type: string
     - jsonPath: .spec.appVersion
       name: AppVersion
       type: string
@@ -98,7 +95,9 @@ spec:
               lastUpdate:
                 format: date-time
                 type: string
-              status:
+              resourceState:
+                type: string
+              state:
                 type: string
               version:
                 description: current manifest version
