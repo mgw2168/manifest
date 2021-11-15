@@ -18,8 +18,8 @@ spec:
   changeLog_en: |
     - English log mysql
     - English log mysql
-  operatorVersion: "2.0.1"
-  appVersion: "5.7"
+  operatorVersion: "2.1.0"
+  appVersion: "5.7.34"
   owner: "RadonDB"
 status:
   state: active

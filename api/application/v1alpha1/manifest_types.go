@@ -26,7 +26,8 @@ import (
 // ManifestSpec defines the desired state of Manifest
 type ManifestSpec struct {
 	// cluster name
-	Cluster string `json:"cluster,omitempty"`
+	Cluster   string `json:"cluster,omitempty"`
+	Namespace string `json:"namespace,omitempty"`
 	// kind of the database cluster
 	Kind string `json:"kind"`
 	// info from frontend
@@ -43,6 +44,7 @@ type ManifestSpec struct {
 type ManifestStatus struct {
 	State         string      `json:"state,omitempty"`
 	ResourceState string      `json:"resourceState,omitempty"`
+	PostgreFlag   bool        `json:"postgreFlag,omitempty"`
 	Condition     []ApiResult `json:"condition,omitempty"`
 	// current manifest version
 	Version    int         `json:"version,omitempty"`
@@ -62,6 +64,7 @@ type ApiResult struct {
 //+kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.status"
 //+kubebuilder:printcolumn:name="AppVersion",type="string",JSONPath=".spec.appVersion"
 //+kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+//+kubebuilder:resource:scope=Cluster
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 //+genclient:nonNamespaced

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github.com/manifest/api/application/v1alpha1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func convertObjState(state string) (frontState string) {
@@ -34,26 +35,28 @@ func convertObjState(state string) (frontState string) {
 	return
 }
 
-//func (r *ManifestReconciler) newClusterClient(clusterName string, scheme *runtime.Scheme) (client.Client, error) {
-//	var clusterCli client.Client
-//	clusterInfo, err := r.clusterClients.Get(clusterName)
-//	if err != nil {
-//		klog.Errorf("get cluster(%s) info error: %s", clusterName, err)
-//		return nil, err
-//	}
-//	if !r.clusterClients.IsHostCluster(clusterInfo) {
-//		clusterCli = r.Client
-//	} else {
-//		config, err := clientcmd.RESTConfigFromKubeConfig(clusterInfo.Spec.Connection.KubeConfig)
-//		if err != nil {
-//			klog.Errorf("get cluster config error: %s", err)
-//			return nil, err
-//		}
-//		clusterCli, err = client.New(config, client.Options{Scheme: scheme})
-//		if err != nil {
-//			klog.Errorf("get cluster client with kubeconfig error: %s", err)
-//			return nil, err
-//		}
-//	}
-//	return clusterCli, nil
-//}
+
+func (r *ManifestReconciler) newClusterClient(clusterName string) (client.Client, error) {
+	var clusterCli client.Client
+	//if r.MultiClusterEnable && clusterName != "" {
+	//	clusterInfo, err := r.clusterClients.Get(clusterName)
+	//	if err != nil {
+	//		klog.Errorf("get cluster(%s) info error: %s", clusterName, err)
+	//		return nil, err
+	//	}
+	//
+	//	config, err := clientcmd.RESTConfigFromKubeConfig(clusterInfo.Spec.Connection.KubeConfig)
+	//	if err != nil {
+	//		klog.Errorf("get cluster config error: %s", err)
+	//		return nil, err
+	//	}
+	//	clusterCli, err = client.New(config, client.Options{Scheme: r.Scheme})
+	//	if err != nil {
+	//		klog.Errorf("get cluster client with kubeconfig error: %s", err)
+	//		return nil, err
+	//	}
+	//} else {
+	//	return r.Client, nil
+	//}
+	return clusterCli, nil
+}

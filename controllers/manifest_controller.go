@@ -220,11 +220,6 @@ func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alp
 			err = r.Status().Update(ctx, resource)
 			return err
 		}
-	} else if resourceKind == v1alpha1.KindPostgreSQLCluster {
-		err = r.getPostgresPassword(resource, obj)
-		if err != nil {
-			return err
-		}
 	}
 	return nil
 }
@@ -250,6 +245,11 @@ func (r *ManifestReconciler) createOrDeleteMysqlClusterPasswordSecret(ctx contex
 
 func (r *ManifestReconciler) checkResourceStatus(ctx context.Context, resource *v1alpha1.Manifest) (ctrl.Result, error) {
 	klog.V(1).Infof("do check status: %s, %s, %s", resource.Namespace, resource.Name, resource.Spec.Kind)
+	cli, err := r.newClusterClient(resource.GetManifestCluster())
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
 	obj, err := getUnstructuredObj(resource)
 	if err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
@@ -267,6 +267,11 @@ func (r *ManifestReconciler) checkResourceStatus(ctx context.Context, resource *
 	resourceKind := obj.GetKind()
 	if resourceKind == v1alpha1.KindPostgreSQLCluster {
 		clusterStatus, _ = r.getPgClusterStatus(ctx, obj)
+		if clusterStatus == v1alpha1.FrontRunning && resource.Status.PostgreFlag == false {
+			if err = r.getPostgresPassword(resource, obj, cli); err == nil {
+				resource.Status.PostgreFlag = true
+			}
+		}
 	} else {
 		clusterStatus = getUnstructuredObjStatus(obj)
 	}
@@ -335,14 +340,13 @@ func (r *ManifestReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *ManifestReconciler) getPostgresPassword(manifest *v1alpha1.Manifest, obj *unstructured.Unstructured) error {
-	time.Sleep(500 * time.Millisecond)
+func (r *ManifestReconciler) getPostgresPassword(manifest *v1alpha1.Manifest, obj *unstructured.Unstructured, cli client.Client) error {
 	secret := &corev1.Secret{
 		TypeMeta:   metav1.TypeMeta{Kind: "Secret", APIVersion: "v1"},
-		ObjectMeta: metav1.ObjectMeta{Name: manifest.Name + "-postgres-secret", Namespace: manifest.Namespace},
+		ObjectMeta: metav1.ObjectMeta{Name: manifest.Name + "-postgres-secret", Namespace: manifest.Spec.Namespace},
 	}
 	if err := r.Get(context.TODO(), types.NamespacedName{
-		Namespace: manifest.Namespace,
+		Namespace: manifest.Spec.Namespace,
 		Name:      manifest.Name + "-postgres-secret",
 	}, secret); err != nil {
 		klog.Errorf("get postgres user's password error: %s", err)
@@ -365,7 +369,7 @@ func (r *ManifestReconciler) getPostgresPassword(manifest *v1alpha1.Manifest, ob
 		}
 	}
 
-	err = r.Get(context.TODO(), types.NamespacedName{
+	err = cli.Get(context.TODO(), types.NamespacedName{
 		Namespace: obj.GetNamespace(),
 		Name:      obj.GetName(),
 	}, obj)
@@ -373,7 +377,7 @@ func (r *ManifestReconciler) getPostgresPassword(manifest *v1alpha1.Manifest, ob
 		return client.IgnoreNotFound(err)
 	}
 	obj.Object["spec"] = spec
-	err = r.Patch(context.TODO(), obj, client.Merge)
+	err = cli.Patch(context.TODO(), obj, client.Merge)
 	if err != nil {
 		klog.Errorf("patch postgresqlcluster resource error: %s", err)
 	}
