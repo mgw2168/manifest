@@ -14,7 +14,7 @@ spec:
     listKind: ManifestList
     plural: manifests
     singular: manifest
-  scope: Namespaced
+  scope: Cluster
   versions:
     - additionalPrinterColumns:
         - jsonPath: .spec.kind
@@ -64,6 +64,8 @@ spec:
                 kind:
                   description: kind of the database cluster
                   type: string
+                namespace:
+                  type: string
                 version:
                   description: expected release version, when this version is not equal
                     status.version, the release need upgrade this filed should be modified
@@ -95,6 +97,8 @@ spec:
                 lastUpdate:
                   format: date-time
                   type: string
+                postgreFlag:
+                  type: boolean
                 resourceState:
                   type: string
                 state:
