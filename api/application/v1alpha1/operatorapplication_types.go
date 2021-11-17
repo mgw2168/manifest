@@ -39,7 +39,8 @@ type OperatorApplicationSpec struct {
 
 // OperatorApplicationStatus defines the observed state of OperatorApplication
 type OperatorApplicationStatus struct {
-	State string `json:"state,omitempty"`
+	LatestVersion string `json:"latestVersion,omitempty"`
+	State         string `json:"state,omitempty"`
 }
 
 //+genclient

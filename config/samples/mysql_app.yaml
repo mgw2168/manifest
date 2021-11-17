@@ -25,4 +25,5 @@ spec:
   icon: "https://raw.githubusercontent.com/radondb/radondb-mysql-kubernetes/main/docs/images/logo_radondb-mysql.png"
   owner: "RadonDB"
 status:
+  latestVersion: "2.1.0 [5.7.34]"
   state: active

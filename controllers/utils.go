@@ -35,7 +35,6 @@ func convertObjState(state string) (frontState string) {
 	return
 }
 
-
 func (r *ManifestReconciler) newClusterClient(clusterName string) (client.Client, error) {
 	var clusterCli client.Client
 	//if r.MultiClusterEnable && clusterName != "" {
