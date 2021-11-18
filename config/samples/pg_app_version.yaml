@@ -13,13 +13,17 @@ spec:
   screenshots_en: |
     - https://github.com/radondb/radondb-clickhouse-kubernetes/raw/main/document/_images/logo_radondb.svg
   changeLog: |
-    - Distributed引擎支持currentDatabase函数
-    - 增强备份恢复功能
+    - docs: Add the README_zh and README_en
+    - docs: Add deploy-mannual and monitor
+    - docs: Modfy the readme-files
+    - api: re-modify api names
   changeLog_en: |
-    - English log pg
-    - English log pg
-  operatorVersion: "1.1.0"
-  appVersion: "15.6"
+    - docs: Add the README_zh and README_en
+    - docs: Add deploy-mannual and monitor
+    - docs: Modfy the readme-files
+    - api: re-modify api names
+  operatorVersion: "2.0"
+  appVersion: "13.3"
   owner: "RadonDB"
 status:
   state: active
