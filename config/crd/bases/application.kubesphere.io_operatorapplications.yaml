@@ -41,12 +41,12 @@ spec:
             properties:
               abstraction:
                 type: string
-              abstraction_en:
+              abstraction_zh:
                 type: string
               description:
                 description: description from operator's description or frontend
                 type: string
-              description_en:
+              description_zh:
                 type: string
               icon:
                 type: string

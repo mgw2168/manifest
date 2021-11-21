@@ -29,9 +29,9 @@ type OperatorApplicationSpec struct {
 	AppName string `json:"name"`
 	// description from operator's description or frontend
 	Description   string `json:"description,omitempty"`
-	DescriptionEn string `json:"description_en,omitempty"`
+	DescriptionZh string `json:"description_zh,omitempty"`
 	Abstraction   string `json:"abstraction,omitempty"`
-	AbstractionEn string `json:"abstraction_en,omitempty"`
+	AbstractionZh string `json:"abstraction_zh,omitempty"`
 	Operator      string `json:"operator"`
 	Icon          string `json:"icon,omitempty"`
 	Owner         string `json:"owner,omitempty"`

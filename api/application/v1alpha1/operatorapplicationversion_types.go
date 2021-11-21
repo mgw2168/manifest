@@ -29,9 +29,9 @@ type OperatorApplicationVersionSpec struct {
 	// the name of the operator
 	AppName         string `json:"name"`
 	Screenshots     string `json:"screenshots,omitempty"`
-	ScreenshotsEn   string `json:"screenshots_en,omitempty"`
+	ScreenshotsZh   string `json:"screenshots_zh,omitempty"`
 	ChangeLog       string `json:"changeLog"`
-	ChangeLogEn     string `json:"changeLog_en,omitempty"`
+	ChangeLogZh     string `json:"changeLog_zh,omitempty"`
 	OperatorVersion string `json:"operatorVersion"`
 	AppVersion      string `json:"appVersion"`
 	Owner           string `json:"owner,omitempty"`

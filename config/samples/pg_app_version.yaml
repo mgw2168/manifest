@@ -3,25 +3,27 @@ kind: OperatorApplicationVersion
 metadata:
   name: postgresql
   labels:
-    application.kubesphere.io/operator-app: postgresql
+    category_id: radondb
 spec:
   name: "PostgreSQL"
   screenshots: |
     - https://github.com/radondb/radondb-clickhouse-kubernetes/raw/main/document/_images/logo_radondb.svg
     - https://github.com/radondb/radondb-clickhouse-kubernetes/raw/main/document/_images/logo_radondb.svg
     - https://github.com/radondb/radondb-clickhouse-kubernetes/raw/main/document/_images/logo_radondb.svg
-  screenshots_en: |
+  screenshots_zh: |
     - https://github.com/radondb/radondb-clickhouse-kubernetes/raw/main/document/_images/logo_radondb.svg
   changeLog: |
     - docs: Add the README_zh and README_en
     - docs: Add deploy-mannual and monitor
     - docs: Modfy the readme-files
     - api: re-modify api names
-  changeLog_en: |
-    - docs: Add the README_zh and README_en
-    - docs: Add deploy-mannual and monitor
-    - docs: Modfy the readme-files
-    - api: re-modify api names
+  changeLog_zh: |
+    - 支持12.7及13.3内核版本
+    - 所有内核版本均支持PostGis插件
+    - 支持水平及垂直扩缩容
+    - 基于分布式一致性协议的高可用方案
+    - 支持同步/异步的流复制
+    - 丰富的监控指标展示
   operatorVersion: "2.0"
   appVersion: "13.3"
   owner: "RadonDB"

@@ -3,21 +3,21 @@ kind: OperatorApplicationVersion
 metadata:
   name: clickhouse
   labels:
-    application.kubesphere.io/operator-app: clickhouse
+    category_id: radondb
 spec:
   name: "ClickHouse"
   screenshots: |
     - https://github.com/radondb/radondb-clickhouse-kubernetes/raw/main/document/_images/logo_radondb.svg
     - https://github.com/radondb/radondb-clickhouse-kubernetes/raw/main/document/_images/logo_radondb.svg
     - https://github.com/radondb/radondb-clickhouse-kubernetes/raw/main/document/_images/logo_radondb.svg
-  screenshots_en: |
+  screenshots_zh: |
     - https://github.com/radondb/radondb-clickhouse-kubernetes/raw/main/document/_images/logo_radondb.svg
   changeLog: |
     - change version from 2.0 to 2.1
     - create/delete zookeeper when create/delete clickhouse
     - rename status to state
     - add describle about cluster parameter
-  changeLog_en: |
+  changeLog_zh: |
     - change version from 2.0 to 2.1
     - create/delete zookeeper when create/delete clickhouse
     - rename status to state

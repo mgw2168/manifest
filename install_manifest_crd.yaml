@@ -66,6 +66,18 @@ spec:
                   type: string
                 namespace:
                   type: string
+                relatedResources:
+                  items:
+                    properties:
+                      data:
+                        type: string
+                      name:
+                        type: string
+                    required:
+                      - data
+                      - name
+                    type: object
+                  type: array
                 version:
                   description: expected release version, when this version is not equal
                     status.version, the release need upgrade this filed should be modified
@@ -80,12 +92,10 @@ spec:
             status:
               description: ManifestStatus defines the observed state of Manifest
               properties:
-                condition:
+                conditions:
                   items:
                     description: ApiResult defines the result of pg operator ApiServer
                     properties:
-                      api:
-                        type: string
                       code:
                         type: string
                       data:
@@ -161,12 +171,12 @@ spec:
               properties:
                 abstraction:
                   type: string
-                abstraction_en:
+                abstraction_zh:
                   type: string
                 description:
                   description: description from operator's description or frontend
                   type: string
-                description_en:
+                description_zh:
                   type: string
                 icon:
                   type: string
@@ -246,7 +256,7 @@ spec:
                   type: string
                 changeLog:
                   type: string
-                changeLog_en:
+                changeLog_zh:
                   type: string
                 name:
                   description: the name of the operator
@@ -257,7 +267,7 @@ spec:
                   type: string
                 screenshots:
                   type: string
-                screenshots_en:
+                screenshots_zh:
                   type: string
               required:
                 - appVersion

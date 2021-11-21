@@ -31,13 +31,19 @@ type ManifestSpec struct {
 	// kind of the database cluster
 	Kind string `json:"kind"`
 	// info from frontend
-	Description    string `json:"description,omitempty"`
-	AppName        string `json:"app,omitempty"`
-	AppVersion     string `json:"appVersion"`
-	CustomResource string `json:"customResource" yaml:"customResource"`
+	Description      string            `json:"description,omitempty"`
+	AppName          string            `json:"app,omitempty"`
+	AppVersion       string            `json:"appVersion"`
+	CustomResource   string            `json:"customResource" yaml:"customResource"`
+	RelatedResources []relatedResource `json:"relatedResources,omitempty" yaml:"relatedResources"`
 	// expected release version, when this version is not equal status.version, the release need upgrade
 	// this filed should be modified when any filed of the spec modified.
 	Version int `json:"version"`
+}
+
+type relatedResource struct {
+	Name string `json:"name"`
+	Data string `json:"data" yaml:"data"`
 }
 
 // ManifestStatus defines the observed state of Manifest
@@ -45,15 +51,14 @@ type ManifestStatus struct {
 	State         string      `json:"state,omitempty"`
 	ResourceState string      `json:"resourceState,omitempty"`
 	PostgreFlag   bool        `json:"postgreFlag,omitempty"`
-	Condition     []ApiResult `json:"condition,omitempty"`
+	Conditions    []condition `json:"conditions,omitempty"`
 	// current manifest version
 	Version    int         `json:"version,omitempty"`
 	LastUpdate metav1.Time `json:"lastUpdate,omitempty"`
 }
 
 // ApiResult defines the result of pg operator ApiServer
-type ApiResult struct {
-	Api  string `json:"api,omitempty"`
+type condition struct {
 	Code string `json:"code,omitempty"`
 	Msg  string `json:"msg,omitempty"`
 	Data string `json:"data,omitempty"`
