@@ -54,15 +54,10 @@ spec:
                 appVersion:
                   type: string
                 cluster:
-                  description: cluster name
                   type: string
                 customResource:
                   type: string
                 description:
-                  description: info from frontend
-                  type: string
-                kind:
-                  description: kind of the database cluster
                   type: string
                 namespace:
                   type: string
@@ -86,7 +81,6 @@ spec:
               required:
                 - appVersion
                 - customResource
-                - kind
                 - version
               type: object
             status:
@@ -183,13 +177,10 @@ spec:
                 name:
                   description: the name of the operator application
                   type: string
-                operator:
-                  type: string
                 owner:
                   type: string
               required:
                 - name
-                - operator
               type: object
             status:
               description: OperatorApplicationStatus defines the observed state of OperatorApplication
@@ -259,7 +250,6 @@ spec:
                 changeLog_zh:
                   type: string
                 name:
-                  description: the name of the operator
                   type: string
                 operatorVersion:
                   type: string

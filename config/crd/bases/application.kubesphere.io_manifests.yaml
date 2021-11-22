@@ -54,15 +54,10 @@ spec:
               appVersion:
                 type: string
               cluster:
-                description: cluster name
                 type: string
               customResource:
                 type: string
               description:
-                description: info from frontend
-                type: string
-              kind:
-                description: kind of the database cluster
                 type: string
               namespace:
                 type: string
@@ -86,7 +81,6 @@ spec:
             required:
             - appVersion
             - customResource
-            - kind
             - version
             type: object
           status:

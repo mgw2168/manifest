@@ -47,7 +47,6 @@ spec:
               changeLog_zh:
                 type: string
               name:
-                description: the name of the operator
                 type: string
               operatorVersion:
                 type: string

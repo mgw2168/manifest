@@ -25,23 +25,19 @@ import (
 
 // ManifestSpec defines the desired state of Manifest
 type ManifestSpec struct {
-	// cluster name
-	Cluster   string `json:"cluster,omitempty"`
-	Namespace string `json:"namespace,omitempty"`
-	// kind of the database cluster
-	Kind string `json:"kind"`
-	// info from frontend
+	Cluster          string            `json:"cluster,omitempty"`
+	Namespace        string            `json:"namespace,omitempty"`
 	Description      string            `json:"description,omitempty"`
 	AppName          string            `json:"app,omitempty"`
 	AppVersion       string            `json:"appVersion"`
 	CustomResource   string            `json:"customResource" yaml:"customResource"`
-	RelatedResources []relatedResource `json:"relatedResources,omitempty" yaml:"relatedResources"`
+	RelatedResources []RelatedResource `json:"relatedResources,omitempty" yaml:"relatedResources"`
 	// expected release version, when this version is not equal status.version, the release need upgrade
 	// this filed should be modified when any filed of the spec modified.
 	Version int `json:"version"`
 }
 
-type relatedResource struct {
+type RelatedResource struct {
 	Name string `json:"name"`
 	Data string `json:"data" yaml:"data"`
 }

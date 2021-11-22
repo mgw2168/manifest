@@ -179,7 +179,7 @@ func (r *ManifestReconciler) deleteCluster(ctx context.Context, resource *v1alph
 }
 
 func (r *ManifestReconciler) installCluster(ctx context.Context, resource *v1alpha1.Manifest) error {
-	klog.Infof("install cluster: %s, %s, %s", resource.Namespace, resource.Name, resource.Spec.Kind)
+	klog.Infof("install cluster: %s, %s", resource.Namespace, resource.Name)
 	obj, err := getUnstructuredObj(resource)
 	if err != nil {
 		return err
@@ -244,7 +244,7 @@ func (r *ManifestReconciler) createOrDeleteMysqlClusterPasswordSecret(ctx contex
 }
 
 func (r *ManifestReconciler) checkResourceStatus(ctx context.Context, resource *v1alpha1.Manifest) (ctrl.Result, error) {
-	klog.V(1).Infof("do check status: %s, %s, %s", resource.Namespace, resource.Name, resource.Spec.Kind)
+	klog.V(1).Infof("do check status: %s, %s", resource.Namespace, resource.Name)
 	cli, err := r.newClusterClient(resource.GetManifestCluster())
 	if err != nil {
 		return ctrl.Result{}, err
