@@ -23,7 +23,6 @@ spec:
     - Provide Semi-Sync plug-in to ensure data consistency between nodes.
     - Support master/slave switchover in seconds to ensure service continuity that based on Raft protocol.
     - Provide functions such as automatic backup and alarm monitoring.
-  operator: "admin"
   icon: "https://raw.githubusercontent.com/radondb/radondb-mysql-kubernetes/main/docs/images/logo_radondb-mysql.png"
   owner: "RadonDB"
 status:

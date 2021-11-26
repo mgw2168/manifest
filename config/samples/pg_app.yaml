@@ -25,7 +25,6 @@ spec:
     - Provide PostgreSQL common APIs to facilitate parameter adjustment.
     - Provide PostGIS plug-in to store, query and modify spatial relationships.
     - Provide functions such as real-time monitoring, health check and automatic log clearing.
-  operator: "admin"
   icon: "https://raw.githubusercontent.com/radondb/radondb-mysql-kubernetes/main/docs/images/logo_radondb-mysql.png"
   owner: "RadonDB"
 status:

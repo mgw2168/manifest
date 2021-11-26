@@ -21,7 +21,6 @@ spec:
     - Provide visual cluster management functions, including online horizontal scaling, parameter optimization and account management.
     - Provide advanced cluster management functions, including data redistribution.
     - Provide functions such as automatic backup and alarm monitoring.
-  operator: "admin"
   icon: "https://raw.githubusercontent.com/radondb/radondb-mysql-kubernetes/main/docs/images/logo_radondb-mysql.png"
   owner: "RadonDB"
 status:
