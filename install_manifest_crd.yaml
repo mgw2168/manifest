@@ -17,10 +17,7 @@ spec:
   scope: Cluster
   versions:
     - additionalPrinterColumns:
-        - jsonPath: .spec.kind
-          name: Kind
-          type: string
-        - jsonPath: .status.status
+        - jsonPath: .status.resourceState
           name: Status
           type: string
         - jsonPath: .spec.appVersion
@@ -74,8 +71,8 @@ spec:
                     type: object
                   type: array
                 version:
-                  description: expected release version, when this version is not equal
-                    status.version, the release need upgrade this filed should be modified
+                  description: expected manifest version, when this version is not equal
+                    status.version, the manifest need update this filed should be modified
                     when any filed of the spec modified.
                   type: integer
               required:
@@ -88,7 +85,6 @@ spec:
               properties:
                 conditions:
                   items:
-                    description: ApiResult defines the result of pg operator ApiServer
                     properties:
                       code:
                         type: string
@@ -101,14 +97,23 @@ spec:
                 lastUpdate:
                   format: date-time
                   type: string
-                postgreFlag:
-                  type: boolean
+                relatedResourceState:
+                  items:
+                    properties:
+                      resourceName:
+                        type: string
+                      resourceState:
+                        type: string
+                    required:
+                      - resourceName
+                      - resourceState
+                    type: object
+                  type: array
                 resourceState:
                   type: string
                 state:
                   type: string
                 version:
-                  description: current manifest version
                   type: integer
               type: object
           type: object
@@ -137,8 +142,6 @@ spec:
     kind: OperatorApplication
     listKind: OperatorApplicationList
     plural: operatorapplications
-    shortNames:
-      - oapp
     singular: operatorapplication
   scope: Cluster
   versions:
@@ -168,16 +171,18 @@ spec:
                 abstraction_zh:
                   type: string
                 description:
-                  description: description from operator's description or frontend
                   type: string
                 description_zh:
                   type: string
                 icon:
                   type: string
                 name:
-                  description: the name of the operator application
                   type: string
                 owner:
+                  type: string
+                screenshots:
+                  type: string
+                screenshots_zh:
                   type: string
               required:
                 - name
@@ -216,8 +221,6 @@ spec:
     kind: OperatorApplicationVersion
     listKind: OperatorApplicationVersionList
     plural: operatorapplicationversions
-    shortNames:
-      - oappver
     singular: operatorapplicationversion
   scope: Cluster
   versions:
